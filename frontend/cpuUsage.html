@@ -1,134 +1,301 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CPU Usage Chart</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        body, html {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-        }
-        canvas {
-            display: block;
-            width: 100vw;  
-            height: 100vh; 
-            margin: 20px;
-        }
-        button {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            padding: 10px 20px;
-            font-size: 16px;
-            z-index: 10;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Result Flow — Live Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root {
+      --primary: #1a56db; --primary-dark: #1e429f;
+      --success: #059669; --warning: #d97706; --danger: #dc2626;
+      --bg: #0f172a; --card: #1e293b; --text: #e2e8f0;
+      --muted: #94a3b8; --border: #334155;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); height: 100vh; display: flex; flex-direction: column; }
+
+    /* ── Header ──────────────────────────────── */
+    header {
+      background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+      padding: 13px 24px;
+      display: flex; align-items: center; justify-content: space-between;
+      flex-shrink: 0;
+    }
+    .hdr-left { display: flex; align-items: center; gap: 10px; }
+    .hdr-left h1 { font-size: 18px; font-weight: 800; }
+    .hdr-left span { font-size: 12px; opacity: 0.8; margin-left: 6px; }
+    header a {
+      color: rgba(255,255,255,0.88); text-decoration: none;
+      font-size: 12px; padding: 6px 14px;
+      border: 1px solid rgba(255,255,255,0.3); border-radius: 16px; margin-left: 8px;
+    }
+    header a:hover { background: rgba(255,255,255,0.12); }
+
+    /* ── Layout ──────────────────────────────── */
+    .layout { display: grid; grid-template-columns: 270px 1fr; flex: 1; overflow: hidden; }
+
+    /* ── Sidebar ─────────────────────────────── */
+    .sidebar { background: var(--card); border-right: 1px solid var(--border); padding: 18px; overflow-y: auto; }
+    .section-label { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 10px; margin-top: 20px; }
+    .section-label:first-child { margin-top: 0; }
+
+    .algo-badge {
+      background: var(--primary-dark); color: white;
+      padding: 10px 14px; border-radius: 10px;
+      font-size: 14px; font-weight: 700; margin-bottom: 4px;
+    }
+    .algo-badge span { opacity: 0.75; font-weight: 400; font-size: 12px; display: block; margin-top: 3px; }
+
+    .stat-row { display: flex; gap: 10px; margin: 14px 0; }
+    .stat-box { flex: 1; background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 12px; text-align: center; }
+    .stat-box .num   { font-size: 26px; font-weight: 800; color: var(--primary); }
+    .stat-box .label { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+    /* ── Server list ─────────────────────────── */
+    .server-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 7px 11px; border-radius: 8px; margin-bottom: 5px;
+      font-size: 13px; border: 1px solid var(--border);
+    }
+    .server-item.primary { border-color: var(--success); }
+    .server-item.standby { border-color: var(--warning); opacity: 0.75; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .dot.green  { background: var(--success); }
+    .dot.yellow { background: var(--warning); }
+    .dot.red    { background: var(--danger); }
+    .s-port  { font-weight: 700; }
+    .s-label { font-size: 11px; color: var(--muted); margin-left: auto; }
+
+    /* ── Algorithm switcher ──────────────────── */
+    select.algo-select {
+      width: 100%; padding: 8px 12px; background: var(--bg);
+      color: var(--text); border: 1px solid var(--border);
+      border-radius: 8px; font-size: 13px; margin-bottom: 8px;
+    }
+    .btn-apply {
+      width: 100%; padding: 8px; background: var(--primary);
+      color: white; border: none; border-radius: 8px;
+      font-size: 13px; cursor: pointer; margin-bottom: 4px;
+    }
+    .btn-apply:hover { background: var(--primary-dark); }
+    .apply-msg { font-size: 11px; color: var(--success); display: none; margin-top: 4px; }
+
+    /* ── LB status ───────────────────────────── */
+    .lb-row { font-size: 13px; padding: 4px 0; }
+
+    /* ── Chart area ──────────────────────────── */
+    .chart-area { padding: 18px; overflow-y: auto; }
+    .chart-card { background: var(--card); border-radius: 12px; border: 1px solid var(--border); padding: 20px; margin-bottom: 18px; }
+    .chart-title { font-size: 14px; font-weight: 700; margin-bottom: 14px; color: var(--text); }
+    .chart-card canvas { max-height: 310px; }
+    .refresh-info { font-size: 11px; color: var(--muted); text-align: right; margin-bottom: 8px; }
+  </style>
 </head>
 <body>
-    <canvas id="cpuUsageChart"></canvas>
-    <button onclick="window.location.href='requestCount.html'">Go to Request Count Chart</button>
 
-    <script>
-        const allServers = [
-            "http://localhost:8001",
-            "http://localhost:8002",
-            "http://localhost:8003",
-            "http://localhost:8004",
-            "http://localhost:8005",
-            "http://localhost:8006",
-            "http://localhost:8007",
-        ];
+<header>
+  <div class="hdr-left">
+    <span style="font-size:22px;">🎓</span>
+    <h1>Result Flow</h1>
+    <span>Live Infrastructure Dashboard</span>
+  </div>
+  <div>
+    <a href="index.html">🔍 Student Portal</a>
+    <a href="requestCount.html">📈 Connections</a>
+  </div>
+</header>
 
-        let cpuUsageChartInstance = null;
+<div class="layout">
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="section-label">Active Algorithm</div>
+    <div class="algo-badge">
+      ⚙ <span id="currentAlgo" style="display:inline; font-size:14px; font-weight:700; opacity:1;">Loading…</span>
+      <span>via LB-4002</span>
+    </div>
 
-        async function fetchMetrics() {
-            try {
-                const response = await fetch('http://localhost:4002/metrics');
-                const metrics = await response.json();
+    <div class="stat-row">
+      <div class="stat-box">
+        <div class="num" id="primaryCount">—</div>
+        <div class="label">Active</div>
+      </div>
+      <div class="stat-box">
+        <div class="num" id="standbyCount">—</div>
+        <div class="label">Standby</div>
+      </div>
+    </div>
 
-                const serverNames = allServers;
-                const cpuUsages = serverNames.map(server => metrics.cpuUsages[server] || 0);
-                
-                const averageCpuUsage = calculateAverage(cpuUsages);
+    <div class="section-label">Server Pool</div>
+    <div id="serverList">
+      <div style="font-size:13px; color:var(--muted);">Fetching…</div>
+    </div>
 
-                updateCpuUsageChart(serverNames, cpuUsages, averageCpuUsage); 
-            } catch (error) {
-                console.error('Error fetching metrics:', error);
+    <div class="section-label">Change Algorithm</div>
+    <select class="algo-select" id="algoSelect">
+      <option value="Round Robin">Round Robin</option>
+      <option value="Weighted Round Robin">Weighted Round Robin</option>
+      <option value="Least Connections">Least Connections</option>
+      <option value="Least Response Time">Least Response Time</option>
+      <option value="Dynamic">Dynamic</option>
+    </select>
+    <button class="btn-apply" onclick="changeAlgorithm()">▶ Apply to All LBs</button>
+    <div class="apply-msg" id="applyMsg">✓ Algorithm updated!</div>
+
+    <div class="section-label">Load Balancers</div>
+    <div id="lbStatus">
+      <div class="lb-row" style="color:var(--muted);">Checking…</div>
+    </div>
+  </div>
+
+  <!-- Chart area -->
+  <div class="chart-area">
+    <div class="refresh-info" id="lastUpdated">Auto-refreshes every 2s</div>
+    <div class="chart-card">
+      <div class="chart-title">🖥 CPU Usage per Server (%)</div>
+      <canvas id="cpuChart"></canvas>
+    </div>
+  </div>
+</div>
+
+<script>
+const LB_MAIN = 'http://localhost:4002';
+const LB_ALL  = ['http://localhost:4001', 'http://localhost:4002'];
+let cpuChart  = null;
+
+// ── Status panel ──────────────────────────────────────────────────────────────
+async function fetchStatus() {
+  try {
+    const r    = await fetch(`${LB_MAIN}/status`);
+    const data = await r.json();
+
+    document.getElementById('currentAlgo').textContent = data.algorithm;
+    document.getElementById('primaryCount').textContent = data.primaryServers.length;
+    document.getElementById('standbyCount').textContent = data.scalingServers.length;
+
+    let html = '';
+    (data.primaryServers || []).forEach(s => {
+      const p = s.split(':')[2];
+      html += `<div class="server-item primary">
+        <div class="dot green"></div>
+        <span class="s-port">:${p}</span>
+        <span class="s-label">Primary</span>
+      </div>`;
+    });
+    (data.scalingServers || []).forEach(s => {
+      const p = s.split(':')[2];
+      html += `<div class="server-item standby">
+        <div class="dot yellow"></div>
+        <span class="s-port">:${p}</span>
+        <span class="s-label">Standby</span>
+      </div>`;
+    });
+    document.getElementById('serverList').innerHTML = html || '<div style="font-size:13px;color:var(--muted);">No data</div>';
+  } catch {
+    document.getElementById('serverList').innerHTML =
+      '<div style="font-size:13px;color:var(--danger);">LB unreachable</div>';
+  }
+}
+
+// ── CPU chart ─────────────────────────────────────────────────────────────────
+async function fetchMetrics() {
+  try {
+    const r       = await fetch(`${LB_MAIN}/metrics`);
+    const metrics = await r.json();
+
+    const servers = Object.keys(metrics.cpuUsages);
+    const labels  = servers.map(s => 'Srv:' + s.split(':')[2]);
+    const values  = servers.map(s => metrics.cpuUsages[s] || 0);
+    const colors  = values.map(v =>
+      v > 75 ? 'rgba(220,38,38,0.85)' :
+      v > 50 ? 'rgba(217,119,6,0.85)' :
+               'rgba(5,150,105,0.85)'
+    );
+
+    if (cpuChart) {
+      cpuChart.data.labels = labels;
+      cpuChart.data.datasets[0].data = values;
+      cpuChart.data.datasets[0].backgroundColor = colors;
+      cpuChart.data.datasets[0].borderColor = colors;
+      cpuChart.update('none');
+    } else {
+      const ctx = document.getElementById('cpuChart').getContext('2d');
+      cpuChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels,
+          datasets: [{
+            label: 'CPU Usage (%)',
+            data: values,
+            backgroundColor: colors,
+            borderColor: colors,
+            borderWidth: 2,
+            borderRadius: 6,
+          }]
+        },
+        options: {
+          responsive: true,
+          animation: { duration: 400 },
+          scales: {
+            y: {
+              beginAtZero: true, max: 100,
+              ticks: { color: '#94a3b8', font: { size: 13 } },
+              grid:  { color: '#1e293b' }
+            },
+            x: {
+              ticks: { color: '#94a3b8', font: { size: 13 } },
+              grid:  { color: '#334155' }
             }
+          },
+          plugins: { legend: { labels: { color: '#e2e8f0', font: { size: 14 } } } }
         }
+      });
+    }
+    document.getElementById('lastUpdated').textContent =
+      'Last updated: ' + new Date().toLocaleTimeString();
+  } catch { /* chart not updated if LB is down */ }
+}
 
-        function calculateAverage(cpuUsages) {
-            const total = cpuUsages.reduce((acc, usage) => acc + usage, 0);
-            return (cpuUsages.length > 0) ? (total / cpuUsages.length).toFixed(2) : 0; 
-        }
+// ── LB health ─────────────────────────────────────────────────────────────────
+async function checkLBHealth() {
+  let html = '';
+  for (const url of LB_ALL) {
+    const port = url.split(':')[2];
+    try {
+      await fetch(`${url}/health`);
+      html += `<div class="lb-row" style="color:var(--success);">● LB-${port} Online</div>`;
+    } catch {
+      html += `<div class="lb-row" style="color:var(--danger);">● LB-${port} Offline</div>`;
+    }
+  }
+  document.getElementById('lbStatus').innerHTML = html;
+}
 
-        function updateCpuUsageChart(serverNames, cpuUsages, averageCpuUsage) {
-            const ctx = document.getElementById('cpuUsageChart').getContext('2d');
+// ── Change algorithm ──────────────────────────────────────────────────────────
+async function changeAlgorithm() {
+  const algo = document.getElementById('algoSelect').value;
+  for (const url of LB_ALL) {
+    try {
+      await fetch(`${url}/changeAlgorithm`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ algorithm: algo }),
+      });
+    } catch { /* skip offline LB */ }
+  }
+  document.getElementById('currentAlgo').textContent = algo;
+  const msg = document.getElementById('applyMsg');
+  msg.style.display = 'block';
+  setTimeout(() => { msg.style.display = 'none'; }, 2500);
+}
 
-            if (cpuUsageChartInstance) {
-                cpuUsageChartInstance.destroy();
-            }
-
-            cpuUsageChartInstance = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: serverNames,
-                    datasets: [{
-                        label: 'CPU Usage (%)',
-                        data: cpuUsages,
-                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                        borderColor: 'rgba(75, 192, 192, 1)',
-                        borderWidth: 3
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: true,
-                    scales: {
-                        x: {
-                            ticks: {
-                                font: {
-                                    size: 18,
-                                }
-                            }
-                        },
-                        y: {
-                            ticks: {
-                                font: {
-                                    size: 20,
-                                },
-                                beginAtZero: true,
-                                max: 100,
-                            }
-                        }
-                    },
-                    plugins: {
-                        legend: {
-                            labels: {
-                                font: {
-                                    size: 40
-                                }
-                            }
-                        },
-                        title: {
-                            display: true,
-                            text: `Average CPU Usage: ${averageCpuUsage}%`, 
-                            font: {
-                                size: 24 
-                            }
-                        }
-                    }
-                }
-            });
-        }
-
-        fetchMetrics();
-        setInterval(fetchMetrics, 2000);
-    </script>
+// ── Init & intervals ──────────────────────────────────────────────────────────
+fetchStatus();
+fetchMetrics();
+checkLBHealth();
+setInterval(fetchMetrics,  2000);
+setInterval(fetchStatus,   5000);
+setInterval(checkLBHealth, 30000);
+</script>
 </body>
 </html>

@@ -1,8 +1,14 @@
 {
-    "algorithm": "Round Robin",
-    "highUsageThreshold": 75,
-    "lowUsageThreshold": 25,
-    "minPrimaryServers": 4,
-    "autoscaling": true
-  }
-  
+  "algorithm": "Round Robin",
+  "weights": {
+    "http://localhost:8001": 3,
+    "http://localhost:8002": 3,
+    "http://localhost:8003": 2,
+    "http://localhost:8004": 2,
+    "http://localhost:8005": 1
+  },
+  "highUsageThreshold": 75,
+  "lowUsageThreshold": 25,
+  "minPrimaryServers": 4,
+  "autoscaling": true
+}

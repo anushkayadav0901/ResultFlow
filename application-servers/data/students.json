@@ -1,0 +1,257 @@
+[
+  {
+    "rollNumber": "RF2101001",
+    "name": "Aarav Sharma",
+    "course": "B.Tech - Computer Science & Engineering",
+    "semester": 4,
+    "subjects": [
+      { "name": "Mathematics IV",              "maxMarks": 100, "marksObtained": 78 },
+      { "name": "Operating Systems",           "maxMarks": 100, "marksObtained": 82 },
+      { "name": "Computer Networks",           "maxMarks": 100, "marksObtained": 75 },
+      { "name": "Database Management Systems", "maxMarks": 100, "marksObtained": 88 },
+      { "name": "Cloud Computing",             "maxMarks": 100, "marksObtained": 91 }
+    ],
+    "total": 414,
+    "maxTotal": 500,
+    "percentage": "82.80",
+    "status": "Pass"
+  },
+  {
+    "rollNumber": "RF2101002",
+    "name": "Priya Verma",
+    "course": "B.Tech - Computer Science & Engineering",
+    "semester": 4,
+    "subjects": [
+      { "name": "Mathematics IV",              "maxMarks": 100, "marksObtained": 65 },
+      { "name": "Operating Systems",           "maxMarks": 100, "marksObtained": 70 },
+      { "name": "Computer Networks",           "maxMarks": 100, "marksObtained": 68 },
+      { "name": "Database Management Systems", "maxMarks": 100, "marksObtained": 72 },
+      { "name": "Cloud Computing",             "maxMarks": 100, "marksObtained": 69 }
+    ],
+    "total": 344,
+    "maxTotal": 500,
+    "percentage": "68.80",
+    "status": "Pass"
+  },
+  {
+    "rollNumber": "RF2101003",
+    "name": "Rohit Kumar",
+    "course": "B.Tech - Computer Science & Engineering",
+    "semester": 4,
+    "subjects": [
+      { "name": "Mathematics IV",              "maxMarks": 100, "marksObtained": 45 },
+      { "name": "Operating Systems",           "maxMarks": 100, "marksObtained": 52 },
+      { "name": "Computer Networks",           "maxMarks": 100, "marksObtained": 48 },
+      { "name": "Database Management Systems", "maxMarks": 100, "marksObtained": 55 },
+      { "name": "Cloud Computing",             "maxMarks": 100, "marksObtained": 50 }
+    ],
+    "total": 250,
+    "maxTotal": 500,
+    "percentage": "50.00",
+    "status": "Pass"
+  },
+  {
+    "rollNumber": "RF2101004",
+    "name": "Sneha Patel",
+    "course": "B.Tech - Computer Science & Engineering",
+    "semester": 4,
+    "subjects": [
+      { "name": "Mathematics IV",              "maxMarks": 100, "marksObtained": 92 },
+      { "name": "Operating Systems",           "maxMarks": 100, "marksObtained": 88 },
+      { "name": "Computer Networks",           "maxMarks": 100, "marksObtained": 95 },
+      { "name": "Database Management Systems", "maxMarks": 100, "marksObtained": 90 },
+      { "name": "Cloud Computing",             "maxMarks": 100, "marksObtained": 97 }
+    ],
+    "total": 462,
+    "maxTotal": 500,
+    "percentage": "92.40",
+    "status": "Pass"
+  },
+  {
+    "rollNumber": "RF2101005",
+    "name": "Arjun Nair",
+    "course": "B.Tech - Computer Science & Engineering",
+    "semester": 4,
+    "subjects": [
+      { "name": "Mathematics IV",              "maxMarks": 100, "marksObtained": 35 },
+      { "name": "Operating Systems",           "maxMarks": 100, "marksObtained": 60 },
+      { "name": "Computer Networks",           "maxMarks": 100, "marksObtained": 42 },
+      { "name": "Database Management Systems", "maxMarks": 100, "marksObtained": 58 },
+      { "name": "Cloud Computing",             "maxMarks": 100, "marksObtained": 55 }
+    ],
+    "total": 250,
+    "maxTotal": 500,
+    "percentage": "50.00",
+    "status": "Fail"
+  },
+  {
+    "rollNumber": "RF2101006",
+    "name": "Kavya Singh",
+    "course": "B.Tech - Computer Science & Engineering",
+    "semester": 4,
+    "subjects": [
+      { "name": "Mathematics IV",              "maxMarks": 100, "marksObtained": 72 },
+      { "name": "Operating Systems",           "maxMarks": 100, "marksObtained": 68 },
+      { "name": "Computer Networks",           "maxMarks": 100, "marksObtained": 74 },
+      { "name": "Database Management Systems", "maxMarks": 100, "marksObtained": 70 },
+      { "name": "Cloud Computing",             "maxMarks": 100, "marksObtained": 76 }
+    ],
+    "total": 360,
+    "maxTotal": 500,
+    "percentage": "72.00",
+    "status": "Pass"
+  },
+  {
+    "rollNumber": "RF2101007",
+    "name": "Rahul Gupta",
+    "course": "B.Tech - Computer Science & Engineering",
+    "semester": 4,
+    "subjects": [
+      { "name": "Mathematics IV",              "maxMarks": 100, "marksObtained": 55 },
+      { "name": "Operating Systems",           "maxMarks": 100, "marksObtained": 48 },
+      { "name": "Computer Networks",           "maxMarks": 100, "marksObtained": 62 },
+      { "name": "Database Management Systems", "maxMarks": 100, "marksObtained": 44 },
+      { "name": "Cloud Computing",             "maxMarks": 100, "marksObtained": 51 }
+    ],
+    "total": 260,
+    "maxTotal": 500,
+    "percentage": "52.00",
+    "status": "Pass"
+  },
+  {
+    "rollNumber": "RF2101008",
+    "name": "Ananya Joshi",
+    "course": "B.Tech - Computer Science & Engineering",
+    "semester": 4,
+    "subjects": [
+      { "name": "Mathematics IV",              "maxMarks": 100, "marksObtained": 88 },
+      { "name": "Operating Systems",           "maxMarks": 100, "marksObtained": 91 },
+      { "name": "Computer Networks",           "maxMarks": 100, "marksObtained": 85 },
+      { "name": "Database Management Systems", "maxMarks": 100, "marksObtained": 93 },
+      { "name": "Cloud Computing",             "maxMarks": 100, "marksObtained": 89 }
+    ],
+    "total": 446,
+    "maxTotal": 500,
+    "percentage": "89.20",
+    "status": "Pass"
+  },
+  {
+    "rollNumber": "RF2101009",
+    "name": "Vikram Reddy",
+    "course": "B.Tech - Computer Science & Engineering",
+    "semester": 4,
+    "subjects": [
+      { "name": "Mathematics IV",              "maxMarks": 100, "marksObtained": 42 },
+      { "name": "Operating Systems",           "maxMarks": 100, "marksObtained": 38 },
+      { "name": "Computer Networks",           "maxMarks": 100, "marksObtained": 45 },
+      { "name": "Database Management Systems", "maxMarks": 100, "marksObtained": 40 },
+      { "name": "Cloud Computing",             "maxMarks": 100, "marksObtained": 44 }
+    ],
+    "total": 209,
+    "maxTotal": 500,
+    "percentage": "41.80",
+    "status": "Fail"
+  },
+  {
+    "rollNumber": "RF2101010",
+    "name": "Pooja Mehta",
+    "course": "B.Tech - Computer Science & Engineering",
+    "semester": 4,
+    "subjects": [
+      { "name": "Mathematics IV",              "maxMarks": 100, "marksObtained": 80 },
+      { "name": "Operating Systems",           "maxMarks": 100, "marksObtained": 77 },
+      { "name": "Computer Networks",           "maxMarks": 100, "marksObtained": 82 },
+      { "name": "Database Management Systems", "maxMarks": 100, "marksObtained": 79 },
+      { "name": "Cloud Computing",             "maxMarks": 100, "marksObtained": 83 }
+    ],
+    "total": 401,
+    "maxTotal": 500,
+    "percentage": "80.20",
+    "status": "Pass"
+  },
+  {
+    "rollNumber": "RF2101011",
+    "name": "Nikhil Tiwari",
+    "course": "B.Tech - Computer Science & Engineering",
+    "semester": 3,
+    "subjects": [
+      { "name": "Data Structures",         "maxMarks": 100, "marksObtained": 72 },
+      { "name": "Digital Electronics",     "maxMarks": 100, "marksObtained": 68 },
+      { "name": "Discrete Mathematics",    "maxMarks": 100, "marksObtained": 65 },
+      { "name": "Computer Architecture",   "maxMarks": 100, "marksObtained": 70 },
+      { "name": "OOP with Java",           "maxMarks": 100, "marksObtained": 75 }
+    ],
+    "total": 350,
+    "maxTotal": 500,
+    "percentage": "70.00",
+    "status": "Pass"
+  },
+  {
+    "rollNumber": "RF2101012",
+    "name": "Divya Rao",
+    "course": "B.Tech - Computer Science & Engineering",
+    "semester": 3,
+    "subjects": [
+      { "name": "Data Structures",         "maxMarks": 100, "marksObtained": 85 },
+      { "name": "Digital Electronics",     "maxMarks": 100, "marksObtained": 90 },
+      { "name": "Discrete Mathematics",    "maxMarks": 100, "marksObtained": 88 },
+      { "name": "Computer Architecture",   "maxMarks": 100, "marksObtained": 82 },
+      { "name": "OOP with Java",           "maxMarks": 100, "marksObtained": 92 }
+    ],
+    "total": 437,
+    "maxTotal": 500,
+    "percentage": "87.40",
+    "status": "Pass"
+  },
+  {
+    "rollNumber": "RF2101013",
+    "name": "Siddharth Jain",
+    "course": "B.Tech - Computer Science & Engineering",
+    "semester": 3,
+    "subjects": [
+      { "name": "Data Structures",         "maxMarks": 100, "marksObtained": 48 },
+      { "name": "Digital Electronics",     "maxMarks": 100, "marksObtained": 42 },
+      { "name": "Discrete Mathematics",    "maxMarks": 100, "marksObtained": 38 },
+      { "name": "Computer Architecture",   "maxMarks": 100, "marksObtained": 45 },
+      { "name": "OOP with Java",           "maxMarks": 100, "marksObtained": 50 }
+    ],
+    "total": 223,
+    "maxTotal": 500,
+    "percentage": "44.60",
+    "status": "Fail"
+  },
+  {
+    "rollNumber": "RF2101014",
+    "name": "Meera Nambiar",
+    "course": "B.Tech - Computer Science & Engineering",
+    "semester": 3,
+    "subjects": [
+      { "name": "Data Structures",         "maxMarks": 100, "marksObtained": 60 },
+      { "name": "Digital Electronics",     "maxMarks": 100, "marksObtained": 55 },
+      { "name": "Discrete Mathematics",    "maxMarks": 100, "marksObtained": 58 },
+      { "name": "Computer Architecture",   "maxMarks": 100, "marksObtained": 62 },
+      { "name": "OOP with Java",           "maxMarks": 100, "marksObtained": 59 }
+    ],
+    "total": 294,
+    "maxTotal": 500,
+    "percentage": "58.80",
+    "status": "Pass"
+  },
+  {
+    "rollNumber": "RF2101015",
+    "name": "Tushar Bhatt",
+    "course": "B.Tech - Computer Science & Engineering",
+    "semester": 4,
+    "subjects": [
+      { "name": "Mathematics IV",              "maxMarks": 100, "marksObtained": 61 },
+      { "name": "Operating Systems",           "maxMarks": 100, "marksObtained": 66 },
+      { "name": "Computer Networks",           "maxMarks": 100, "marksObtained": 63 },
+      { "name": "Database Management Systems", "maxMarks": 100, "marksObtained": 68 },
+      { "name": "Cloud Computing",             "maxMarks": 100, "marksObtained": 70 }
+    ],
+    "total": 328,
+    "maxTotal": 500,
+    "percentage": "65.60",
+    "status": "Pass"
+  }
+]

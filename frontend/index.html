@@ -1,30 +1,289 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Load Balancer UI</title>
-    <script src="script.js" defer></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Result Flow — Student Result Portal</title>
+  <style>
+    :root {
+      --primary:      #1a56db;
+      --primary-dark: #1e429f;
+      --accent:       #0ea5e9;
+      --success:      #059669;
+      --danger:       #dc2626;
+      --bg:           #f0f4f8;
+      --card:         #ffffff;
+      --text:         #1f2937;
+      --muted:        #6b7280;
+      --border:       #e5e7eb;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+    /* ── Header ──────────────────────────────── */
+    header {
+      background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 60%, var(--accent) 100%);
+      color: white;
+      padding: 18px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.25);
+    }
+    .logo-area { display: flex; align-items: center; gap: 14px; }
+    .logo-icon { font-size: 38px; }
+    .logo-text h1 { font-size: 26px; font-weight: 800; letter-spacing: 1px; }
+    .logo-text p  { font-size: 13px; opacity: 0.85; margin-top: 2px; }
+    .header-links a {
+      color: rgba(255,255,255,0.9);
+      text-decoration: none;
+      font-size: 13px;
+      padding: 7px 16px;
+      border: 1px solid rgba(255,255,255,0.35);
+      border-radius: 20px;
+      transition: background 0.2s;
+    }
+    .header-links a:hover { background: rgba(255,255,255,0.15); }
+
+    /* ── Main ────────────────────────────────── */
+    main { max-width: 920px; margin: 0 auto; padding: 36px 20px; }
+
+    /* ── Search card ─────────────────────────── */
+    .search-card {
+      background: var(--card);
+      border-radius: 16px;
+      padding: 32px;
+      box-shadow: 0 4px 18px rgba(0,0,0,0.08);
+      margin-bottom: 28px;
+    }
+    .search-card h2 { font-size: 20px; margin-bottom: 20px; color: var(--primary-dark); }
+
+    .form-row { display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-end; }
+    .form-group { display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 190px; }
+    .form-group label { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.6px; }
+
+    input[type="text"], select {
+      padding: 12px 14px;
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      font-size: 15px;
+      outline: none;
+      transition: border-color 0.2s;
+      width: 100%;
+    }
+    input[type="text"]:focus, select:focus { border-color: var(--primary); }
+
+    .btn-primary {
+      padding: 12px 28px;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background 0.2s, transform 0.1s;
+    }
+    .btn-primary:hover  { background: var(--primary-dark); transform: translateY(-1px); }
+    .btn-primary:disabled { background: var(--muted); cursor: not-allowed; transform: none; }
+
+    /* ── Status bar ──────────────────────────── */
+    .status-bar {
+      margin-top: 16px;
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .status-bar.ok    { background: #d1fae5; color: #065f46; }
+    .status-bar.error { background: #fee2e2; color: #991b1b; }
+    .status-bar.info  { background: #dbeafe; color: #1e40af; }
+    .status-dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
+
+    /* ── Demo hint ───────────────────────────── */
+    .demo-hint {
+      background: #fff8e1;
+      border: 1px solid #fbbf24;
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 13px;
+      color: #78350f;
+      margin-top: 14px;
+    }
+
+    /* ── Result card ─────────────────────────── */
+    .result-card {
+      background: var(--card);
+      border-radius: 16px;
+      box-shadow: 0 4px 18px rgba(0,0,0,0.08);
+      overflow: hidden;
+      animation: fadeUp 0.3s ease;
+    }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+
+    .result-header {
+      padding: 24px 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2px solid var(--border);
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .result-header.pass { background: linear-gradient(135deg, #ecfdf5, #d1fae5); }
+    .result-header.fail { background: linear-gradient(135deg, #fff1f2, #fee2e2); }
+
+    .student-name { font-size: 22px; font-weight: 800; }
+    .student-sub  { font-size: 13px; color: var(--muted); margin-top: 4px; }
+
+    .result-badge {
+      padding: 10px 26px;
+      border-radius: 24px;
+      font-size: 17px;
+      font-weight: 800;
+      letter-spacing: 1px;
+    }
+    .result-badge.pass { background: var(--success); color: white; }
+    .result-badge.fail { background: var(--danger);  color: white; }
+
+    .result-body { padding: 28px 32px; }
+
+    /* ── Meta boxes ──────────────────────────── */
+    .meta-row { display: flex; gap: 14px; margin-bottom: 24px; flex-wrap: wrap; }
+    .meta-box {
+      background: var(--bg);
+      border-radius: 10px;
+      padding: 14px 20px;
+      flex: 1;
+      min-width: 120px;
+      text-align: center;
+    }
+    .meta-box .meta-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 5px; }
+    .meta-box .meta-value { font-size: 20px; font-weight: 800; color: var(--primary-dark); }
+
+    /* ── Marks table ─────────────────────────── */
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    thead th { background: var(--primary-dark); color: white; padding: 10px 16px; text-align: left; }
+    thead th:last-child { text-align: center; }
+    tbody td { padding: 10px 16px; border-bottom: 1px solid var(--border); }
+    tbody td:last-child { text-align: center; font-weight: 700; }
+    tbody tr:hover td { background: #f8fafc; }
+    .mark-low  { color: var(--danger); }
+    tfoot td { padding: 10px 16px; background: var(--bg); font-weight: 800; }
+    tfoot td:last-child { text-align: center; }
+
+    /* ── Fail notice ─────────────────────────── */
+    .fail-notice {
+      margin-top: 16px;
+      padding: 12px 16px;
+      background: #fee2e2;
+      border-left: 4px solid var(--danger);
+      border-radius: 6px;
+      font-size: 13px;
+      color: #7f1d1d;
+    }
+
+    /* ── Server metadata ─────────────────────── */
+    .server-meta {
+      margin-top: 20px;
+      padding: 12px 16px;
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .server-meta-title { font-weight: 700; color: var(--text); margin-bottom: 6px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .server-meta-row { display: flex; gap: 20px; flex-wrap: wrap; }
+    .server-meta-row span { display: flex; align-items: center; gap: 5px; }
+    .server-meta-row strong { color: var(--text); }
+
+    /* ── Loader ──────────────────────────────── */
+    .loader {
+      display: inline-block; width: 15px; height: 15px;
+      border: 2px solid #fff; border-top-color: transparent;
+      border-radius: 50%; animation: spin 0.7s linear infinite; vertical-align: middle;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Error state ─────────────────────────── */
+    .error-state { padding: 48px 32px; text-align: center; }
+    .error-state .error-icon { font-size: 52px; margin-bottom: 14px; }
+    .error-state h3 { color: var(--danger); font-size: 20px; margin-bottom: 8px; }
+    .error-state p  { color: var(--muted); font-size: 14px; }
+
+    /* ── Footer ──────────────────────────────── */
+    footer {
+      text-align: center;
+      padding: 24px;
+      color: var(--muted);
+      font-size: 13px;
+      border-top: 1px solid var(--border);
+      margin-top: 48px;
+    }
+    footer strong { color: var(--primary); }
+  </style>
 </head>
 <body>
-    <style> 
-        * {
-            margin: 15px;
-        }
-        button {
-            padding: 6px;
-        }
-    </style>
 
-    <h1>Load Balancer Algorithm Selection</h1>
-    <a href="cpuUsage.html" target="_blank">Link to dashboard</a><br/><br/><br/>
+<header>
+  <div class="logo-area">
+    <div class="logo-icon">🎓</div>
+    <div class="logo-text">
+      <h1>Result Flow</h1>
+      <p>Student Result Portal — Cloud Computing Project</p>
+    </div>
+  </div>
+  <div class="header-links">
+    <a href="cpuUsage.html" target="_blank">📊 Live Dashboard</a>
+  </div>
+</header>
 
-    <button id="sendRequestButton">Send Request</button>
+<main>
+  <div class="search-card">
+    <h2>🔍 Check Your Result</h2>
+    <div class="form-row">
+      <div class="form-group" style="flex:2; min-width:220px;">
+        <label for="rollNumber">Roll Number</label>
+        <input type="text" id="rollNumber" placeholder="e.g. RF2101001" autocomplete="off" />
+      </div>
+      <div class="form-group" style="min-width:230px;">
+        <label for="algorithm">Load Balancing Algorithm</label>
+        <select id="algorithm">
+          <option value="Round Robin">Round Robin</option>
+          <option value="Weighted Round Robin">Weighted Round Robin</option>
+          <option value="Least Connections">Least Connections</option>
+          <option value="Least Response Time">Least Response Time</option>
+          <option value="Dynamic">Dynamic</option>
+        </select>
+      </div>
+      <button class="btn-primary" id="getResultBtn" onclick="getResult()">Get Result</button>
+    </div>
 
-    <h2>Response:</h2>
-    <div id="responseMessage"></div> 
+    <div id="statusBar" class="status-bar info">
+      <div class="status-dot"></div>
+      <span>Checking load balancer connectivity…</span>
+    </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <div class="demo-hint">
+      <strong>Demo Roll Numbers:</strong> RF2101001 to RF2101015 &nbsp;|&nbsp;
+      Try different algorithms — watch the <a href="cpuUsage.html" target="_blank" style="color:#92400e;">Live Dashboard</a> to see request distribution in real time!
+    </div>
+  </div>
+
+  <div id="resultSection" style="display:none;" class="result-card">
+    <!-- Populated by script.js -->
+  </div>
+</main>
+
+<footer>
+  Developed by <strong>Anushka Yadav</strong> &nbsp;|&nbsp; B.Tech Cloud Computing Project &nbsp;|&nbsp; Result Flow v1.0
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script src="script.js"></script>
 </body>
 </html>

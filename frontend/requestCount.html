@@ -1,138 +1,150 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Request Count Chart</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        body, html {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-        }
-        canvas {
-            display: block;
-            width: 100vw;  
-            height: 100vh; 
-            margin: 20px;
-        }
-        button {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            padding: 10px 20px;
-            font-size: 16px;
-            z-index: 10;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Result Flow — Active Connections</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root {
+      --primary: #1a56db; --primary-dark: #1e429f;
+      --bg: #0f172a; --card: #1e293b; --text: #e2e8f0;
+      --muted: #94a3b8; --border: #334155;
+      --accent: #e879f9;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; }
+
+    header {
+      background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+      padding: 13px 24px; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;
+    }
+    .hdr-left { display: flex; align-items: center; gap: 10px; }
+    .hdr-left h1 { font-size: 18px; font-weight: 800; }
+    .hdr-left span { font-size: 12px; opacity: 0.8; margin-left: 6px; }
+    header a {
+      color: rgba(255,255,255,0.88); text-decoration: none; font-size: 12px;
+      padding: 6px 14px; border: 1px solid rgba(255,255,255,0.3); border-radius: 16px; margin-left: 8px;
+    }
+    header a:hover { background: rgba(255,255,255,0.12); }
+
+    .content { flex: 1; padding: 24px; max-width: 1000px; margin: 0 auto; width: 100%; }
+
+    .stats-row { display: flex; gap: 14px; margin-bottom: 20px; flex-wrap: wrap; }
+    .stat-card { flex: 1; min-width: 140px; background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 16px; text-align: center; }
+    .stat-card .num   { font-size: 28px; font-weight: 800; color: var(--accent); }
+    .stat-card .label { font-size: 12px; color: var(--muted); margin-top: 4px; }
+
+    .chart-card { background: var(--card); border-radius: 14px; border: 1px solid var(--border); padding: 24px; }
+    .chart-title { font-size: 15px; font-weight: 700; margin-bottom: 18px; }
+    .refresh-info { font-size: 11px; color: var(--muted); text-align: right; margin-bottom: 10px; }
+  </style>
 </head>
 <body>
-    
-    <div id="averageConnections" style="margin: 2px;"></div>
-    <canvas id="requestCountChart"></canvas>
-    <button onclick="window.location.href='cpuUsage.html'">Go to CPU Usage Chart</button>
 
-    <script>
-        const allServers = [
-            "http://localhost:8001",
-            "http://localhost:8002",
-            "http://localhost:8003",
-            "http://localhost:8004",
-            "http://localhost:8005",
-            "http://localhost:8006",
-            "http://localhost:8007",
-        ];
+<header>
+  <div class="hdr-left">
+    <span style="font-size:22px;">🎓</span>
+    <h1>Result Flow</h1>
+    <span>Active Connections per Server</span>
+  </div>
+  <div>
+    <a href="index.html">🔍 Student Portal</a>
+    <a href="cpuUsage.html">📊 CPU Dashboard</a>
+  </div>
+</header>
 
-        let requestCountChartInstance = null;
+<div class="content">
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="num" id="totalConn">0</div>
+      <div class="label">Total Active Connections</div>
+    </div>
+    <div class="stat-card">
+      <div class="num" id="avgConn">0.00</div>
+      <div class="label">Avg Connections / Server</div>
+    </div>
+    <div class="stat-card">
+      <div class="num" id="serverCount">—</div>
+      <div class="label">Primary Servers</div>
+    </div>
+  </div>
 
-        async function fetchMetrics() {
-            try {
-                const response = await fetch('http://localhost:4002/metrics');
-                const metrics = await response.json();
+  <div class="refresh-info" id="lastUpdated">Auto-refreshes every 2s</div>
 
-                const serverNames = allServers;
-                const requestCounts = serverNames.map(server => metrics.requestCounts[server] || 0);
+  <div class="chart-card">
+    <div class="chart-title">📈 Active Connections per Server (Real-time)</div>
+    <canvas id="connChart"></canvas>
+  </div>
+</div>
 
-                
-                const totalConnections = requestCounts.reduce((total, count) => total + count, 0);
-                const averageConnections = (totalConnections / serverNames.length).toFixed(2);
+<script>
+const LB_URL = 'http://localhost:4002';
+let connChart = null;
 
-                
-                document.getElementById('averageConnections').innerText = `Average Active Connections: ${averageConnections}`;
+async function fetchMetrics() {
+  try {
+    const r       = await fetch(`${LB_URL}/metrics`);
+    const metrics = await r.json();
 
-               
-                updateRequestCountChart(serverNames, requestCounts, averageConnections);
-            } catch (error) {
-                console.error('Error fetching metrics:', error);
-            }
-        }
+    const servers = Object.keys(metrics.requestCounts);
+    const labels  = servers.map(s => 'Srv:' + s.split(':')[2]);
+    const values  = servers.map(s => metrics.requestCounts[s] || 0);
 
-        function updateRequestCountChart(serverNames, requestCounts, averageConnections) {
-    const ctx = document.getElementById('requestCountChart').getContext('2d');
+    const total   = values.reduce((a, b) => a + b, 0);
+    const avg     = servers.length ? (total / servers.length).toFixed(2) : '0.00';
 
-    
-    if (requestCountChartInstance) {
-        requestCountChartInstance.destroy();
-    }
+    document.getElementById('totalConn').textContent   = total;
+    document.getElementById('avgConn').textContent     = avg;
+    document.getElementById('serverCount').textContent = servers.length;
 
-    requestCountChartInstance = new Chart(ctx, {
+    if (connChart) {
+      connChart.data.labels = labels;
+      connChart.data.datasets[0].data = values;
+      connChart.update('none');
+    } else {
+      const ctx = document.getElementById('connChart').getContext('2d');
+      connChart = new Chart(ctx, {
         type: 'line',
         data: {
-            labels: serverNames,
-            datasets: [{
-                label: `Active Connections (Average: ${averageConnections})`,
-                data: requestCounts,
-                backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                borderColor: 'rgba(255, 99, 132, 1)',
-                borderWidth: 3,
-                fill: false
-            }]
+          labels,
+          datasets: [{
+            label: 'Active Connections',
+            data: values,
+            borderColor: 'rgba(232,121,249,1)',
+            backgroundColor: 'rgba(232,121,249,0.15)',
+            borderWidth: 3,
+            pointBackgroundColor: 'rgba(232,121,249,1)',
+            pointRadius: 5,
+            fill: true,
+            tension: 0.3,
+          }]
         },
         options: {
-            responsive: true,
-            maintainAspectRatio: true,
-            scales: {
-                x: {
-                    ticks: {
-                        font: {
-                            size: 16, 
-                        }
-                    }
-                },
-                y: {
-                    beginAtZero: true,
-                    ticks: {
-                        font: {
-                            size: 16, 
-                        }
-                    }
-                }
+          responsive: true,
+          animation: { duration: 400 },
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: { color: '#94a3b8', font: { size: 13 } },
+              grid:  { color: '#1e293b' }
             },
-            plugins: {
-                legend: {
-                    labels: {
-                        font: {
-                            size: 20 
-                        }
-                    }
-                },
-                title: {
-                    display: true,
-                    text: 'Active Connections per Server', 
-                    font: {
-                        size: 20 
-                    }
-                }
+            x: {
+              ticks: { color: '#94a3b8', font: { size: 13 } },
+              grid:  { color: '#334155' }
             }
+          },
+          plugins: { legend: { labels: { color: '#e2e8f0', font: { size: 14 } } } }
         }
-    });
+      });
+    }
+    document.getElementById('lastUpdated').textContent =
+      'Last updated: ' + new Date().toLocaleTimeString();
+  } catch { /* silent fail when LB is down */ }
 }
 
-        fetchMetrics();
-        setInterval(fetchMetrics, 2000);
-    </script>
+fetchMetrics();
+setInterval(fetchMetrics, 2000);
+</script>
 </body>
 </html>
