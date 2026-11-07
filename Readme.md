@@ -2,7 +2,7 @@
 
 > A cloud-based system that keeps a college result website running smoothly when thousands of students open it at the same time.
 
-**Author:** Anushka Yadav  
+**Authors:** Anushka Yadav & Anshika Garg
 **Subject:** Cloud Computing  
 **Project Type:** B.Tech CSE — Academic Project  
 **Repository:** [github.com/anushkayadav0901/ResultFlow](https://github.com/anushkayadav0901/ResultFlow)
@@ -423,15 +423,6 @@ The project presentation is included in this repository:
 
 - 📥 [Cloud Computing.pptx](<Cloud Computing.pptx>) — PowerPoint slides
 - 📥 [Cloud Computing.pdf](<Cloud Computing.pdf>) — PDF version
-
----
-
-## 👩‍💻 Author
-
-**Anushka Yadav**  
-B.Tech — Computer Science & Engineering  
-Cloud Computing Subject Project  
-GitHub: [@anushkayadav0901](https://github.com/anushkayadav0901)
 
 ---
 
