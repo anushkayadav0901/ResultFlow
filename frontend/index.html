@@ -20,14 +20,11 @@
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
 
-    /* ── Header ──────────────────────────────── */
+    /* Header */
     header {
       background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 60%, var(--accent) 100%);
-      color: white;
-      padding: 18px 32px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
+      color: white; padding: 18px 32px;
+      display: flex; align-items: center; justify-content: space-between;
       box-shadow: 0 3px 10px rgba(0,0,0,0.25);
     }
     .logo-area { display: flex; align-items: center; gap: 14px; }
@@ -35,26 +32,19 @@
     .logo-text h1 { font-size: 26px; font-weight: 800; letter-spacing: 1px; }
     .logo-text p  { font-size: 13px; opacity: 0.85; margin-top: 2px; }
     .header-links a {
-      color: rgba(255,255,255,0.9);
-      text-decoration: none;
-      font-size: 13px;
-      padding: 7px 16px;
-      border: 1px solid rgba(255,255,255,0.35);
-      border-radius: 20px;
+      color: rgba(255,255,255,0.9); text-decoration: none; font-size: 13px;
+      padding: 7px 16px; border: 1px solid rgba(255,255,255,0.35); border-radius: 20px;
       transition: background 0.2s;
     }
     .header-links a:hover { background: rgba(255,255,255,0.15); }
 
-    /* ── Main ────────────────────────────────── */
-    main { max-width: 920px; margin: 0 auto; padding: 36px 20px; }
+    /* Main */
+    main { max-width: 940px; margin: 0 auto; padding: 36px 20px; }
 
-    /* ── Search card ─────────────────────────── */
+    /* Search card */
     .search-card {
-      background: var(--card);
-      border-radius: 16px;
-      padding: 32px;
-      box-shadow: 0 4px 18px rgba(0,0,0,0.08);
-      margin-bottom: 28px;
+      background: var(--card); border-radius: 16px;
+      padding: 32px; box-shadow: 0 4px 18px rgba(0,0,0,0.08); margin-bottom: 20px;
     }
     .search-card h2 { font-size: 20px; margin-bottom: 20px; color: var(--primary-dark); }
 
@@ -63,75 +53,91 @@
     .form-group label { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.6px; }
 
     input[type="text"], select {
-      padding: 12px 14px;
-      border: 2px solid var(--border);
-      border-radius: 10px;
-      font-size: 15px;
-      outline: none;
-      transition: border-color 0.2s;
-      width: 100%;
+      padding: 12px 14px; border: 2px solid var(--border); border-radius: 10px;
+      font-size: 15px; outline: none; transition: border-color 0.2s; width: 100%;
     }
     input[type="text"]:focus, select:focus { border-color: var(--primary); }
 
     .btn-primary {
-      padding: 12px 28px;
-      background: var(--primary);
-      color: white;
-      border: none;
-      border-radius: 10px;
-      font-size: 15px;
-      font-weight: 700;
-      cursor: pointer;
-      white-space: nowrap;
-      transition: background 0.2s, transform 0.1s;
+      padding: 12px 28px; background: var(--primary); color: white;
+      border: none; border-radius: 10px; font-size: 15px; font-weight: 700;
+      cursor: pointer; white-space: nowrap; transition: background 0.2s, transform 0.1s;
     }
     .btn-primary:hover  { background: var(--primary-dark); transform: translateY(-1px); }
     .btn-primary:disabled { background: var(--muted); cursor: not-allowed; transform: none; }
 
-    /* ── Status bar ──────────────────────────── */
-    .status-bar {
-      margin-top: 16px;
-      padding: 10px 14px;
-      border-radius: 8px;
-      font-size: 13px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
+    /* Status bar */
+    .status-bar { margin-top: 16px; padding: 10px 14px; border-radius: 8px; font-size: 13px; display: flex; align-items: center; gap: 8px; }
     .status-bar.ok    { background: #d1fae5; color: #065f46; }
     .status-bar.error { background: #fee2e2; color: #991b1b; }
     .status-bar.info  { background: #dbeafe; color: #1e40af; }
     .status-dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
 
-    /* ── Demo hint ───────────────────────────── */
+    /* Demo hint */
     .demo-hint {
-      background: #fff8e1;
-      border: 1px solid #fbbf24;
-      border-radius: 8px;
-      padding: 10px 14px;
-      font-size: 13px;
-      color: #78350f;
-      margin-top: 14px;
+      background: #fff8e1; border: 1px solid #fbbf24; border-radius: 8px;
+      padding: 10px 14px; font-size: 13px; color: #78350f; margin-top: 14px;
     }
 
-    /* ── Result card ─────────────────────────── */
+    /* Demo Controls card */
+    .demo-controls-card {
+      background: var(--card); border-radius: 16px;
+      padding: 22px 28px; box-shadow: 0 4px 18px rgba(0,0,0,0.08); margin-bottom: 20px;
+    }
+    .demo-controls-card h2 { font-size: 16px; margin-bottom: 14px; color: var(--primary-dark); }
+    .demo-btn-row { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+
+    .btn-rush {
+      padding: 11px 20px;
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      color: white; border: none; border-radius: 10px;
+      font-size: 14px; font-weight: 700; cursor: pointer;
+      transition: opacity 0.2s, transform 0.1s;
+    }
+    .btn-rush:hover { opacity: 0.9; transform: translateY(-1px); }
+    .btn-rush:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
+
+    .btn-fail {
+      padding: 11px 20px;
+      background: linear-gradient(135deg, #ef4444, #dc2626);
+      color: white; border: none; border-radius: 10px;
+      font-size: 14px; font-weight: 700; cursor: pointer;
+      transition: opacity 0.2s, transform 0.1s;
+    }
+    .btn-fail:hover { opacity: 0.9; transform: translateY(-1px); }
+
+    .btn-recover {
+      padding: 11px 20px;
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: white; border: none; border-radius: 10px;
+      font-size: 14px; font-weight: 700; cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    .btn-recover:hover { opacity: 0.9; }
+    .btn-cancel {
+      padding: 11px 16px; background: var(--border); color: var(--text);
+      border: none; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer;
+    }
+
+    .failure-controls {
+      margin-top: 14px; padding: 16px;
+      background: #fff1f2; border: 1px solid #fca5a5; border-radius: 10px;
+      display: flex; gap: 10px; flex-wrap: wrap; align-items: center; font-size: 13px;
+    }
+    .failure-controls select { padding: 8px 12px; border-radius: 8px; font-size: 13px; border: 1px solid #fca5a5; }
+    .demo-desc { font-size: 12px; color: var(--muted); margin-top: 10px; }
+
+    /* Result card */
     .result-card {
-      background: var(--card);
-      border-radius: 16px;
-      box-shadow: 0 4px 18px rgba(0,0,0,0.08);
-      overflow: hidden;
-      animation: fadeUp 0.3s ease;
+      background: var(--card); border-radius: 16px;
+      box-shadow: 0 4px 18px rgba(0,0,0,0.08); overflow: hidden;
+      animation: fadeUp 0.3s ease; margin-bottom: 20px;
     }
     @keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
 
     .result-header {
-      padding: 24px 32px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-bottom: 2px solid var(--border);
-      flex-wrap: wrap;
-      gap: 12px;
+      padding: 24px 32px; display: flex; justify-content: space-between; align-items: center;
+      border-bottom: 2px solid var(--border); flex-wrap: wrap; gap: 12px;
     }
     .result-header.pass { background: linear-gradient(135deg, #ecfdf5, #d1fae5); }
     .result-header.fail { background: linear-gradient(135deg, #fff1f2, #fee2e2); }
@@ -139,32 +145,19 @@
     .student-name { font-size: 22px; font-weight: 800; }
     .student-sub  { font-size: 13px; color: var(--muted); margin-top: 4px; }
 
-    .result-badge {
-      padding: 10px 26px;
-      border-radius: 24px;
-      font-size: 17px;
-      font-weight: 800;
-      letter-spacing: 1px;
-    }
+    .result-badge { padding: 10px 26px; border-radius: 24px; font-size: 17px; font-weight: 800; letter-spacing: 1px; }
     .result-badge.pass { background: var(--success); color: white; }
     .result-badge.fail { background: var(--danger);  color: white; }
 
     .result-body { padding: 28px 32px; }
 
-    /* ── Meta boxes ──────────────────────────── */
+    /* Meta boxes */
     .meta-row { display: flex; gap: 14px; margin-bottom: 24px; flex-wrap: wrap; }
-    .meta-box {
-      background: var(--bg);
-      border-radius: 10px;
-      padding: 14px 20px;
-      flex: 1;
-      min-width: 120px;
-      text-align: center;
-    }
+    .meta-box { background: var(--bg); border-radius: 10px; padding: 14px 20px; flex: 1; min-width: 120px; text-align: center; }
     .meta-box .meta-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 5px; }
     .meta-box .meta-value { font-size: 20px; font-weight: 800; color: var(--primary-dark); }
 
-    /* ── Marks table ─────────────────────────── */
+    /* Marks table */
     table { width: 100%; border-collapse: collapse; font-size: 14px; }
     thead th { background: var(--primary-dark); color: white; padding: 10px 16px; text-align: left; }
     thead th:last-child { text-align: center; }
@@ -175,33 +168,49 @@
     tfoot td { padding: 10px 16px; background: var(--bg); font-weight: 800; }
     tfoot td:last-child { text-align: center; }
 
-    /* ── Fail notice ─────────────────────────── */
+    /* Fail notice */
     .fail-notice {
-      margin-top: 16px;
-      padding: 12px 16px;
-      background: #fee2e2;
-      border-left: 4px solid var(--danger);
-      border-radius: 6px;
-      font-size: 13px;
-      color: #7f1d1d;
+      margin-top: 16px; padding: 12px 16px;
+      background: #fee2e2; border-left: 4px solid var(--danger);
+      border-radius: 6px; font-size: 13px; color: #7f1d1d;
     }
 
-    /* ── Server metadata ─────────────────────── */
-    .server-meta {
-      margin-top: 20px;
-      padding: 12px 16px;
-      background: #f8fafc;
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      font-size: 12px;
-      color: var(--muted);
-    }
+    /* Server metadata */
+    .server-meta { margin-top: 20px; padding: 12px 16px; background: #f8fafc; border: 1px solid var(--border); border-radius: 10px; font-size: 12px; color: var(--muted); }
     .server-meta-title { font-weight: 700; color: var(--text); margin-bottom: 6px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; }
     .server-meta-row { display: flex; gap: 20px; flex-wrap: wrap; }
     .server-meta-row span { display: flex; align-items: center; gap: 5px; }
     .server-meta-row strong { color: var(--text); }
 
-    /* ── Loader ──────────────────────────────── */
+    /* Rush Hour Results */
+    .rush-section {
+      background: var(--card); border-radius: 16px;
+      box-shadow: 0 4px 18px rgba(0,0,0,0.08); overflow: hidden;
+      margin-bottom: 20px; animation: fadeUp 0.3s ease;
+    }
+    .rush-header { padding: 20px 28px; border-bottom: 1px solid var(--border); }
+    .rush-header h3 { font-size: 18px; color: var(--primary-dark); margin-bottom: 14px; }
+    .rush-stats { display: flex; gap: 24px; flex-wrap: wrap; }
+    .rush-stat { text-align: center; min-width: 80px; }
+    .rush-stat-val   { font-size: 28px; font-weight: 800; }
+    .rush-stat-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+
+    .dist-section { padding: 18px 28px; border-bottom: 1px solid var(--border); }
+    .dist-title { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); margin-bottom: 12px; }
+    .dist-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+    .dist-server { width: 100px; font-size: 12px; font-weight: 700; color: var(--text); flex-shrink: 0; }
+    .dist-bar-wrap { flex: 1; height: 10px; background: var(--border); border-radius: 5px; overflow: hidden; }
+    .dist-bar { height: 100%; background: linear-gradient(90deg, var(--primary), var(--accent)); border-radius: 5px; transition: width 0.5s; }
+    .dist-label { width: 90px; font-size: 12px; color: var(--muted); flex-shrink: 0; text-align: right; }
+
+    .rush-table-wrap { padding: 18px 28px; overflow-x: auto; }
+    .rush-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .rush-table thead th { background: var(--primary-dark); color: white; padding: 8px 12px; text-align: left; }
+    .rush-table tbody td { padding: 7px 12px; border-bottom: 1px solid var(--border); }
+    .rush-table tbody tr:hover td { background: #f8fafc; }
+    .badge-server { display: inline-block; background: #dbeafe; color: #1e40af; border-radius: 12px; padding: 2px 10px; font-size: 11px; font-weight: 700; }
+
+    /* Loader */
     .loader {
       display: inline-block; width: 15px; height: 15px;
       border: 2px solid #fff; border-top-color: transparent;
@@ -209,20 +218,24 @@
     }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* ── Error state ─────────────────────────── */
+    /* Error state */
     .error-state { padding: 48px 32px; text-align: center; }
     .error-state .error-icon { font-size: 52px; margin-bottom: 14px; }
     .error-state h3 { color: var(--danger); font-size: 20px; margin-bottom: 8px; }
     .error-state p  { color: var(--muted); font-size: 14px; }
 
-    /* ── Footer ──────────────────────────────── */
+    /* Toast */
+    .toast {
+      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+      background: #1f2937; color: white; padding: 12px 24px; border-radius: 10px;
+      font-size: 14px; z-index: 9999; box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+      max-width: 90vw; text-align: center;
+    }
+
+    /* Footer */
     footer {
-      text-align: center;
-      padding: 24px;
-      color: var(--muted);
-      font-size: 13px;
-      border-top: 1px solid var(--border);
-      margin-top: 48px;
+      text-align: center; padding: 24px; color: var(--muted);
+      font-size: 13px; border-top: 1px solid var(--border); margin-top: 48px;
     }
     footer strong { color: var(--primary); }
   </style>
@@ -243,6 +256,7 @@
 </header>
 
 <main>
+  <!-- Search Card -->
   <div class="search-card">
     <h2>🔍 Check Your Result</h2>
     <div class="form-row">
@@ -270,10 +284,57 @@
 
     <div class="demo-hint">
       <strong>Demo Roll Numbers:</strong> RF2101001 to RF2101015 &nbsp;|&nbsp;
-      Try different algorithms — watch the <a href="cpuUsage.html" target="_blank" style="color:#92400e;">Live Dashboard</a> to see request distribution in real time!
+      Try different algorithms — watch the
+      <a href="cpuUsage.html" target="_blank" style="color:#92400e;">Live Dashboard</a>
+      to see request distribution in real time!
     </div>
   </div>
 
+  <!-- Demo Controls Card -->
+  <div class="demo-controls-card">
+    <h2>⚡ Demo Controls</h2>
+    <div class="demo-btn-row">
+      <button class="btn-rush" id="rushBtn" onclick="simulateRushHour(20)">
+        🔥 Rush Hour (20 students)
+      </button>
+      <button class="btn-fail" onclick="showFailureControls()">
+        💥 Simulate Server Failure
+      </button>
+    </div>
+
+    <!-- Failure Controls (hidden by default) -->
+    <div id="failureControls" class="failure-controls" style="display:none;">
+      <span>⚙️ Server:</span>
+      <select id="failureServerPort">
+        <option value="8001">Server-8001</option>
+        <option value="8002">Server-8002</option>
+        <option value="8003">Server-8003</option>
+        <option value="8004">Server-8004</option>
+        <option value="8005">Server-8005</option>
+        <option value="8006">Server-8006 (standby)</option>
+        <option value="8007">Server-8007 (standby)</option>
+      </select>
+      <span>⏱ Duration:</span>
+      <select id="failureDuration">
+        <option value="30">30 seconds</option>
+        <option value="60">60 seconds</option>
+        <option value="120">2 minutes</option>
+      </select>
+      <button class="btn-fail" onclick="confirmServerFailure()">Confirm Failure</button>
+      <button class="btn-recover" onclick="recoverServer()">Recover Now</button>
+      <button class="btn-cancel" onclick="document.getElementById('failureControls').style.display='none'">Cancel</button>
+    </div>
+
+    <div class="demo-desc">
+      🔥 <strong>Rush Hour</strong> fires 20 simultaneous requests — see how the load balancer distributes them across servers.
+      &nbsp;|&nbsp; 💥 <strong>Simulate Failure</strong> marks a server unhealthy so the LB reroutes traffic (visible in the dashboard events log).
+    </div>
+  </div>
+
+  <!-- Rush Hour Results (populated by script.js) -->
+  <div id="rushSection" class="rush-section" style="display:none;"></div>
+
+  <!-- Result Card (populated by script.js) -->
   <div id="resultSection" style="display:none;" class="result-card">
     <!-- Populated by script.js -->
   </div>
@@ -282,6 +343,9 @@
 <footer>
   Developed by <strong>Anushka Yadav</strong> &nbsp;|&nbsp; B.Tech Cloud Computing Project &nbsp;|&nbsp; Result Flow v1.0
 </footer>
+
+<!-- Toast notification -->
+<div id="toast" class="toast" style="display:none;"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 <script src="script.js"></script>

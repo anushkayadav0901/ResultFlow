@@ -16,7 +16,12 @@ app.use(json());
 let activeConnections = 0;
 let lastCpuTimes = _cpus().map((cpu) => cpu.times);
 
-// ── Load student result data once at startup ──────────────────────────────────
+// ── Failure simulation state ──────────────────────────────────────────────────
+let failureSimulationActive = false;
+let failureSimulationTimeout = null;
+let failureRecoveryAt = null;
+
+// ── Load student data once at startup ─────────────────────────────────────────
 let studentData = [];
 try {
   const raw = readFileSync(path.join(__dirname, '../data/students.json'), 'utf8');
@@ -55,7 +60,16 @@ const monitorCPUUsage = () => {
 
 // ── Routes ────────────────────────────────────────────────────────────────────
 
+// Health — returns Unhealthy during failure simulation (for demo)
 app.get('/health', (req, res) => {
+  if (failureSimulationActive) {
+    return res.status(503).json({
+      status: 'Unhealthy',
+      server: `Server-${port}`,
+      reason: 'Failure simulation active',
+      recoversAt: failureRecoveryAt,
+    });
+  }
   res.status(200).json({ status: 'Healthy', server: `Server-${port}` });
 });
 
@@ -89,29 +103,49 @@ app.post('/processRequest', (req, res) => {
   }
 });
 
-// ── Result Portal: fetch student result by roll number ────────────────────────
+// ── Result Portal: fetch student result ───────────────────────────────────────
 app.post('/result', (req, res) => {
   const { rollNumber } = req.body;
-
   if (!rollNumber) {
     return res.status(400).json({ error: 'Roll number is required' });
   }
-
   const student = studentData.find(
     (s) => s.rollNumber === rollNumber.trim().toUpperCase()
   );
-
   if (!student) {
     return res.status(404).json({
       error: `No result found for roll number: ${rollNumber.trim().toUpperCase()}`,
     });
   }
-
   res.status(200).json({
     ...student,
     servedBy: `Server-${port}`,
     timestamp: new Date().toISOString(),
   });
+});
+
+// ── Failure simulation (DEMO feature) ────────────────────────────────────────
+app.post('/simulate-failure', (req, res) => {
+  const { duration = 30 } = req.body;
+  failureSimulationActive = true;
+  failureRecoveryAt = new Date(Date.now() + duration * 1000).toISOString();
+  console.log(`[Server-${port}] 🔴 Simulating failure for ${duration}s`);
+  if (failureSimulationTimeout) clearTimeout(failureSimulationTimeout);
+  failureSimulationTimeout = setTimeout(() => {
+    failureSimulationActive = false;
+    failureRecoveryAt = null;
+    console.log(`[Server-${port}] 🟢 Auto-recovered from simulated failure`);
+  }, duration * 1000);
+  res.json({ message: `Server-${port} simulating failure for ${duration}s`, recoversAt: failureRecoveryAt });
+});
+
+// Manual recovery
+app.post('/recover', (req, res) => {
+  if (failureSimulationTimeout) clearTimeout(failureSimulationTimeout);
+  failureSimulationActive = false;
+  failureRecoveryAt = null;
+  console.log(`[Server-${port}] 🟢 Manually recovered`);
+  res.json({ message: `Server-${port} is now Healthy` });
 });
 
 monitorCPUUsage();

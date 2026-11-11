@@ -5,7 +5,7 @@
  *
  * Algorithms: Round Robin, Weighted Round Robin, Least Connections,
  *             Least Response Time, Dynamic
- * Features:   Auto-scaling, Health Checks, /getResult portal route
+ * Features:   Auto-scaling, Health Checks, Events Log, /getResult portal route
  */
 
 const express = require('express');
@@ -18,14 +18,14 @@ const LB_PORT = 4002;
 app.use(cors());
 app.use(express.json());
 
-// ── Load config ───────────────────────────────────────────────────────────────
+// ── Load config ──────────────────────────────────────────────────────────────
 let algorithm = 'Round Robin';
 let serverWeights = {};
 let highUsageThreshold, lowUsageThreshold, minPrimaryServers;
 
 try {
   const config = JSON.parse(readFileSync('./config.json', 'utf8'));
-  algorithm        = config.algorithm        || algorithm;
+  algorithm          = config.algorithm          || algorithm;
   highUsageThreshold = config.highUsageThreshold;
   lowUsageThreshold  = config.lowUsageThreshold;
   minPrimaryServers  = config.minPrimaryServers;
@@ -38,6 +38,16 @@ try {
 const HIGH_USAGE_THRESHOLD = highUsageThreshold || 75;
 const LOW_USAGE_THRESHOLD  = lowUsageThreshold  || 25;
 const MIN_PRIMARY_SERVERS  = minPrimaryServers  || 4;
+
+// ── Event log ─────────────────────────────────────────────────────────────────
+const eventLog = [];
+const MAX_EVENTS = 100;
+
+function logEvent(type, message) {
+  eventLog.unshift({ type, message, timestamp: new Date().toISOString() });
+  if (eventLog.length > MAX_EVENTS) eventLog.pop();
+  console.log(`[LB-${LB_PORT}] [${type}] ${message}`);
+}
 
 // ── Server pools ──────────────────────────────────────────────────────────────
 let primaryServers = [
@@ -53,9 +63,11 @@ let scalingServers = [
   'http://localhost:8007',
 ];
 
-const connectionsCount = {};
-const responseTime = {};
-let roundRobinIndex = 0;
+const connectionsCount  = {};
+const responseTime      = {};
+const serverHealthState = {};   // tracks last known health for change detection
+let   roundRobinIndex   = 0;
+let   totalRequestsHandled = 0;
 
 // ── Health check helper ───────────────────────────────────────────────────────
 const checkServerHealth = async () => {
@@ -69,12 +81,23 @@ const checkServerHealth = async () => {
     }
   });
   const results = await Promise.allSettled(checks);
-  return results.map((r) =>
+  const healthData = results.map((r) =>
     r.status === 'fulfilled' ? r.value : { url: '', healthy: false }
   );
+
+  // Detect state changes and emit events
+  healthData.forEach(({ url, healthy }) => {
+    if (!url) return;
+    const prev = serverHealthState[url];
+    if (prev === true  && !healthy) logEvent('SERVER_DOWN', `${url} went DOWN — traffic rerouted`);
+    if (prev === false &&  healthy) logEvent('SERVER_UP',   `${url} is back ONLINE`);
+    serverHealthState[url] = healthy;
+  });
+
+  return healthData;
 };
 
-// ── Server selection (all algorithms in one place) ────────────────────────────
+// ── Server selection (all algorithms) ────────────────────────────────────────
 const selectServer = async (servers) => {
   switch (algorithm) {
 
@@ -131,14 +154,14 @@ const selectServer = async (servers) => {
   }
 };
 
-// ── Autoscaling ───────────────────────────────────────────────────────────────
+// ── Auto-scaling ──────────────────────────────────────────────────────────────
 const scaleUpServer = () => {
   const server = scalingServers.pop();
   if (server) {
     primaryServers.push(server);
-    console.log(`[LB-${LB_PORT}] SCALE UP  → ${server} moved to primary pool.`);
+    logEvent('SCALE_UP', `${server} promoted to primary. Active: ${primaryServers.length}`);
   } else {
-    console.log(`[LB-${LB_PORT}] No standby servers to scale up.`);
+    logEvent('SCALE_UP_FAIL', `No standby servers available to scale up.`);
   }
 };
 
@@ -147,7 +170,7 @@ const scaleDownServer = (serverUrl) => {
   if (idx > -1 && primaryServers.length > MIN_PRIMARY_SERVERS) {
     primaryServers.splice(idx, 1);
     scalingServers.push(serverUrl);
-    console.log(`[LB-${LB_PORT}] SCALE DOWN → ${serverUrl} moved to standby pool.`);
+    logEvent('SCALE_DOWN', `${serverUrl} moved to standby. Active: ${primaryServers.length}`);
   }
 };
 
@@ -163,7 +186,7 @@ const monitorCPUUsage = async () => {
     })
   );
   usages.forEach(({ url, usage }) => {
-    if (usage > HIGH_USAGE_THRESHOLD)    scaleUpServer();
+    if (usage > HIGH_USAGE_THRESHOLD)   scaleUpServer();
     else if (usage < LOW_USAGE_THRESHOLD) scaleDownServer(url);
   });
 };
@@ -179,11 +202,18 @@ app.get('/status', (req, res) => {
     algorithm,
     primaryServers,
     scalingServers,
-    totalActive:  primaryServers.length,
-    totalStandby: scalingServers.length,
+    totalActive:          primaryServers.length,
+    totalStandby:         scalingServers.length,
+    totalRequestsHandled,
   });
 });
 
+// Events log (last 30 events)
+app.get('/events', (req, res) => {
+  res.json({ events: eventLog.slice(0, 30) });
+});
+
+// Change algorithm at runtime
 app.post('/changeAlgorithm', (req, res) => {
   const { algorithm: newAlgo } = req.body;
   const valid = [
@@ -193,19 +223,23 @@ app.post('/changeAlgorithm', (req, res) => {
   if (!valid.includes(newAlgo)) {
     return res.status(400).json({ error: 'Invalid algorithm', valid });
   }
+  const prev = algorithm;
   algorithm = newAlgo;
   roundRobinIndex = 0;
-  console.log(`[LB-${LB_PORT}] Algorithm changed to: ${algorithm}`);
+  logEvent('ALGO_CHANGE', `Algorithm changed from "${prev}" to "${algorithm}"`);
   res.json({ success: true, algorithm });
 });
 
+// Metrics for dashboard (includes response times)
 app.get('/metrics', async (req, res) => {
   const metrics = {
-    cpuUsages:     {},
-    requestCounts: {},
+    cpuUsages:            {},
+    requestCounts:        {},
+    responseTimes:        {},
     algorithm,
     primaryServers,
     scalingServers,
+    totalRequestsHandled,
   };
   await Promise.all(
     primaryServers.map(async (server) => {
@@ -213,15 +247,18 @@ app.get('/metrics', async (req, res) => {
         const r = await get(`${server}/cpuUsage`, { timeout: 1000 });
         metrics.cpuUsages[server]     = r.data.usage;
         metrics.requestCounts[server] = connectionsCount[server] || 0;
+        metrics.responseTimes[server] = responseTime[server]     || 0;
       } catch {
         metrics.cpuUsages[server]     = 0;
         metrics.requestCounts[server] = 0;
+        metrics.responseTimes[server] = 0;
       }
     })
   );
   res.status(200).json(metrics);
 });
 
+// Original sendRequest (preserved for load-test UI)
 app.post('/sendRequest', async (req, res) => {
   const healthData = await checkServerHealth();
   const servers = healthData.filter((s) => s.healthy).map((s) => s.url);
@@ -238,6 +275,7 @@ app.post('/sendRequest', async (req, res) => {
     const elapsed = Date.now() - startTime;
     responseTime[selectedServer] = elapsed;
     connectionsCount[selectedServer]--;
+    totalRequestsHandled++;
     res.status(200).json({ ...response.data, selectedServer, algorithm, responseTimeMs: elapsed });
   } catch (error) {
     connectionsCount[selectedServer] = Math.max(0, (connectionsCount[selectedServer] || 1) - 1);
@@ -265,6 +303,7 @@ app.post('/getResult', async (req, res) => {
     const elapsed = Date.now() - startTime;
     responseTime[selectedServer] = elapsed;
     connectionsCount[selectedServer]--;
+    totalRequestsHandled++;
 
     console.log(`[LB-${LB_PORT}] Result for ${rollNumber} → ${selectedServer} [${algorithm}] (${elapsed}ms)`);
     res.status(200).json({ ...response.data, loadBalancer: `LB-${LB_PORT}`, algorithm, lbResponseTimeMs: elapsed });
@@ -279,8 +318,9 @@ app.post('/getResult', async (req, res) => {
 
 // ── Intervals ─────────────────────────────────────────────────────────────────
 setInterval(monitorCPUUsage, 500);
-setInterval(checkServerHealth, 30000);
+setInterval(checkServerHealth, 10000);  // 10s for better demo responsiveness
 
 app.listen(LB_PORT, () => {
+  logEvent('STARTUP', `Load Balancer started on port ${LB_PORT}`);
   console.log(`[Result Flow] Load Balancer-2 listening at http://localhost:${LB_PORT}`);
 });

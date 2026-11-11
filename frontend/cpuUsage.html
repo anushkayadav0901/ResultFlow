@@ -7,295 +7,562 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     :root {
-      --primary: #1a56db; --primary-dark: #1e429f;
-      --success: #059669; --warning: #d97706; --danger: #dc2626;
-      --bg: #0f172a; --card: #1e293b; --text: #e2e8f0;
-      --muted: #94a3b8; --border: #334155;
+      --bg:      #0f172a;
+      --card:    #1e293b;
+      --border:  #334155;
+      --text:    #e2e8f0;
+      --muted:   #94a3b8;
+      --primary: #3b82f6;
+      --accent:  #06b6d4;
+      --success: #10b981;
+      --danger:  #ef4444;
+      --warn:    #f59e0b;
+      --purple:  #a855f7;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); height: 100vh; display: flex; flex-direction: column; }
+    body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; }
 
-    /* ── Header ──────────────────────────────── */
+    /* Header */
     header {
-      background: linear-gradient(135deg, var(--primary-dark), var(--primary));
-      padding: 13px 24px;
+      background: linear-gradient(90deg, #1e3a5f, #1a56db);
+      padding: 14px 24px; display: flex; align-items: center; justify-content: space-between;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.4);
+    }
+    .header-left { display: flex; align-items: center; gap: 10px; }
+    .header-left h1 { font-size: 20px; font-weight: 800; letter-spacing: 0.5px; }
+    .header-left p  { font-size: 11px; opacity: 0.75; }
+    .header-right a {
+      color: rgba(255,255,255,0.85); text-decoration: none; font-size: 12px;
+      padding: 6px 14px; border: 1px solid rgba(255,255,255,0.3); border-radius: 16px;
+      transition: background 0.2s;
+    }
+    .header-right a:hover { background: rgba(255,255,255,0.12); }
+
+    /* Layout */
+    .dashboard { display: flex; flex: 1; min-height: 0; }
+
+    /* Sidebar */
+    .sidebar {
+      width: 290px; flex-shrink: 0; background: var(--card);
+      border-right: 1px solid var(--border); padding: 20px 16px;
+      overflow-y: auto; display: flex; flex-direction: column; gap: 20px;
+    }
+
+    .sidebar-section h3 {
+      font-size: 11px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.7px; color: var(--muted); margin-bottom: 10px;
+    }
+
+    /* LB Health */
+    .lb-row {
       display: flex; align-items: center; justify-content: space-between;
-      flex-shrink: 0;
+      padding: 8px 10px; background: rgba(255,255,255,0.04); border-radius: 8px; margin-bottom: 6px;
     }
-    .hdr-left { display: flex; align-items: center; gap: 10px; }
-    .hdr-left h1 { font-size: 18px; font-weight: 800; }
-    .hdr-left span { font-size: 12px; opacity: 0.8; margin-left: 6px; }
-    header a {
-      color: rgba(255,255,255,0.88); text-decoration: none;
-      font-size: 12px; padding: 6px 14px;
-      border: 1px solid rgba(255,255,255,0.3); border-radius: 16px; margin-left: 8px;
-    }
-    header a:hover { background: rgba(255,255,255,0.12); }
+    .lb-name { font-size: 13px; font-weight: 600; }
+    .lb-badge { font-size: 11px; padding: 3px 10px; border-radius: 10px; font-weight: 700; }
+    .lb-badge.ok  { background: rgba(16,185,129,0.2); color: var(--success); }
+    .lb-badge.err { background: rgba(239,68,68,0.2);  color: var(--danger); }
 
-    /* ── Layout ──────────────────────────────── */
-    .layout { display: grid; grid-template-columns: 270px 1fr; flex: 1; overflow: hidden; }
-
-    /* ── Sidebar ─────────────────────────────── */
-    .sidebar { background: var(--card); border-right: 1px solid var(--border); padding: 18px; overflow-y: auto; }
-    .section-label { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 10px; margin-top: 20px; }
-    .section-label:first-child { margin-top: 0; }
-
+    /* Algorithm badge */
     .algo-badge {
-      background: var(--primary-dark); color: white;
-      padding: 10px 14px; border-radius: 10px;
-      font-size: 14px; font-weight: 700; margin-bottom: 4px;
+      display: inline-block; padding: 6px 14px;
+      background: rgba(59,130,246,0.2); color: var(--primary);
+      border-radius: 20px; font-size: 12px; font-weight: 700;
+      border: 1px solid rgba(59,130,246,0.3);
     }
-    .algo-badge span { opacity: 0.75; font-weight: 400; font-size: 12px; display: block; margin-top: 3px; }
 
-    .stat-row { display: flex; gap: 10px; margin: 14px 0; }
-    .stat-box { flex: 1; background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 12px; text-align: center; }
-    .stat-box .num   { font-size: 26px; font-weight: 800; color: var(--primary); }
-    .stat-box .label { font-size: 11px; color: var(--muted); margin-top: 2px; }
-
-    /* ── Server list ─────────────────────────── */
-    .server-item {
-      display: flex; align-items: center; gap: 10px;
-      padding: 7px 11px; border-radius: 8px; margin-bottom: 5px;
-      font-size: 13px; border: 1px solid var(--border);
-    }
-    .server-item.primary { border-color: var(--success); }
-    .server-item.standby { border-color: var(--warning); opacity: 0.75; }
-    .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-    .dot.green  { background: var(--success); }
-    .dot.yellow { background: var(--warning); }
-    .dot.red    { background: var(--danger); }
-    .s-port  { font-weight: 700; }
-    .s-label { font-size: 11px; color: var(--muted); margin-left: auto; }
-
-    /* ── Algorithm switcher ──────────────────── */
-    select.algo-select {
-      width: 100%; padding: 8px 12px; background: var(--bg);
-      color: var(--text); border: 1px solid var(--border);
-      border-radius: 8px; font-size: 13px; margin-bottom: 8px;
+    /* Algorithm switcher */
+    .algo-select {
+      width: 100%; padding: 8px 10px; background: var(--bg);
+      border: 1px solid var(--border); border-radius: 8px; color: var(--text);
+      font-size: 13px; margin-bottom: 8px;
     }
     .btn-apply {
-      width: 100%; padding: 8px; background: var(--primary);
-      color: white; border: none; border-radius: 8px;
-      font-size: 13px; cursor: pointer; margin-bottom: 4px;
+      width: 100%; padding: 9px; background: var(--primary); color: white;
+      border: none; border-radius: 8px; font-size: 13px; font-weight: 700;
+      cursor: pointer; transition: opacity 0.2s;
     }
-    .btn-apply:hover { background: var(--primary-dark); }
-    .apply-msg { font-size: 11px; color: var(--success); display: none; margin-top: 4px; }
+    .btn-apply:hover { opacity: 0.85; }
 
-    /* ── LB status ───────────────────────────── */
-    .lb-row { font-size: 13px; padding: 4px 0; }
+    /* Server pool list */
+    .pool-list { display: flex; flex-direction: column; gap: 5px; }
+    .server-row {
+      display: flex; align-items: center; gap: 8px;
+      padding: 7px 10px; border-radius: 8px; background: rgba(255,255,255,0.03); font-size: 12px;
+    }
+    .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .dot.primary { background: var(--success); }
+    .dot.standby { background: var(--warn); }
+    .dot.down    { background: var(--danger); }
+    .server-name { flex: 1; font-weight: 600; }
+    .pool-tag {
+      font-size: 10px; padding: 2px 7px; border-radius: 8px; font-weight: 700;
+    }
+    .pool-tag.p { background: rgba(16,185,129,0.15); color: var(--success); }
+    .pool-tag.s { background: rgba(245,158,11,0.15); color: var(--warn); }
+    .pool-tag.d { background: rgba(239,68,68,0.15);  color: var(--danger); }
 
-    /* ── Chart area ──────────────────────────── */
-    .chart-area { padding: 18px; overflow-y: auto; }
-    .chart-card { background: var(--card); border-radius: 12px; border: 1px solid var(--border); padding: 20px; margin-bottom: 18px; }
-    .chart-title { font-size: 14px; font-weight: 700; margin-bottom: 14px; color: var(--text); }
-    .chart-card canvas { max-height: 310px; }
-    .refresh-info { font-size: 11px; color: var(--muted); text-align: right; margin-bottom: 8px; }
+    /* Failure controls in sidebar */
+    .fail-select {
+      width: 100%; padding: 8px 10px; background: var(--bg);
+      border: 1px solid var(--border); border-radius: 8px; color: var(--text);
+      font-size: 12px; margin-bottom: 6px;
+    }
+    .fail-btn-row { display: flex; gap: 6px; }
+    .btn-fail-sm {
+      flex: 1; padding: 8px; background: rgba(239,68,68,0.2); color: var(--danger);
+      border: 1px solid rgba(239,68,68,0.3); border-radius: 7px;
+      font-size: 12px; font-weight: 700; cursor: pointer; transition: background 0.2s;
+    }
+    .btn-fail-sm:hover { background: rgba(239,68,68,0.35); }
+    .btn-rec-sm {
+      flex: 1; padding: 8px; background: rgba(16,185,129,0.2); color: var(--success);
+      border: 1px solid rgba(16,185,129,0.3); border-radius: 7px;
+      font-size: 12px; font-weight: 700; cursor: pointer; transition: background 0.2s;
+    }
+    .btn-rec-sm:hover { background: rgba(16,185,129,0.35); }
+
+    /* Main content */
+    .main-content {
+      flex: 1; padding: 20px; overflow-y: auto;
+      display: flex; flex-direction: column; gap: 20px;
+    }
+
+    /* Stats strip */
+    .stats-strip { display: flex; gap: 14px; flex-wrap: wrap; }
+    .stat-card {
+      flex: 1; min-width: 130px; background: var(--card);
+      border-radius: 12px; padding: 16px 18px; border: 1px solid var(--border);
+    }
+    .stat-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+    .stat-value { font-size: 26px; font-weight: 800; color: var(--text); }
+    .stat-sub   { font-size: 11px; color: var(--muted); margin-top: 4px; }
+
+    /* Charts row */
+    .charts-row { display: flex; gap: 16px; flex-wrap: wrap; }
+    .chart-card {
+      flex: 1; min-width: 280px; background: var(--card);
+      border-radius: 12px; padding: 18px; border: 1px solid var(--border);
+    }
+    .chart-card h3 { font-size: 13px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 14px; }
+    .chart-wrap { position: relative; height: 220px; }
+
+    /* Events log */
+    .events-card {
+      background: var(--card); border-radius: 12px;
+      border: 1px solid var(--border); overflow: hidden;
+    }
+    .events-header {
+      padding: 14px 18px; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .events-header h3 { font-size: 13px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    .events-header .refresh-hint { font-size: 11px; color: var(--muted); }
+    .events-list { max-height: 240px; overflow-y: auto; }
+    .event-row {
+      display: flex; align-items: flex-start; gap: 10px;
+      padding: 9px 18px; border-bottom: 1px solid rgba(255,255,255,0.04);
+      font-size: 12px;
+    }
+    .event-row:last-child { border-bottom: none; }
+    .event-type {
+      flex-shrink: 0; min-width: 110px; padding: 2px 8px; border-radius: 8px;
+      font-weight: 700; font-size: 10px; text-align: center;
+    }
+    .et-STARTUP     { background: rgba(59,130,246,0.2); color: var(--primary); }
+    .et-SCALE_UP    { background: rgba(16,185,129,0.2); color: var(--success); }
+    .et-SCALE_DOWN  { background: rgba(14,165,233,0.2); color: var(--accent);  }
+    .et-SCALE_UP_FAIL { background: rgba(245,158,11,0.2); color: var(--warn); }
+    .et-SERVER_DOWN { background: rgba(239,68,68,0.2);  color: var(--danger); }
+    .et-SERVER_UP   { background: rgba(16,185,129,0.2); color: var(--success); }
+    .et-ALGO_CHANGE { background: rgba(168,85,247,0.2); color: var(--purple); }
+    .event-msg  { flex: 1; color: var(--text); }
+    .event-time { flex-shrink: 0; color: var(--muted); font-size: 10px; white-space: nowrap; }
+    .events-empty { padding: 24px 18px; color: var(--muted); font-size: 13px; }
+
+    /* Footer */
+    footer {
+      text-align: center; padding: 14px 24px; color: var(--muted);
+      font-size: 12px; border-top: 1px solid var(--border);
+    }
   </style>
 </head>
 <body>
 
 <header>
-  <div class="hdr-left">
-    <span style="font-size:22px;">🎓</span>
-    <h1>Result Flow</h1>
-    <span>Live Infrastructure Dashboard</span>
+  <div class="header-left">
+    <div>
+      <h1>📊 Result Flow — Live Dashboard</h1>
+      <p>Real-time metrics · Auto-scaling · Health monitoring</p>
+    </div>
   </div>
-  <div>
-    <a href="index.html">🔍 Student Portal</a>
-    <a href="requestCount.html">📈 Connections</a>
+  <div class="header-right">
+    <a href="index.html">← Result Portal</a>
   </div>
 </header>
 
-<div class="layout">
+<div class="dashboard">
   <!-- Sidebar -->
   <div class="sidebar">
-    <div class="section-label">Active Algorithm</div>
-    <div class="algo-badge">
-      ⚙ <span id="currentAlgo" style="display:inline; font-size:14px; font-weight:700; opacity:1;">Loading…</span>
-      <span>via LB-4002</span>
-    </div>
 
-    <div class="stat-row">
-      <div class="stat-box">
-        <div class="num" id="primaryCount">—</div>
-        <div class="label">Active</div>
-      </div>
-      <div class="stat-box">
-        <div class="num" id="standbyCount">—</div>
-        <div class="label">Standby</div>
+    <!-- LB Health -->
+    <div class="sidebar-section">
+      <h3>Load Balancers</h3>
+      <div id="lbStatus">
+        <div class="lb-row"><span class="lb-name">LB-1 (4001)</span><span class="lb-badge err" id="lb1Badge">Checking…</span></div>
+        <div class="lb-row"><span class="lb-name">LB-2 (4002)</span><span class="lb-badge err" id="lb2Badge">Checking…</span></div>
       </div>
     </div>
 
-    <div class="section-label">Server Pool</div>
-    <div id="serverList">
-      <div style="font-size:13px; color:var(--muted);">Fetching…</div>
+    <!-- Active Algorithm -->
+    <div class="sidebar-section">
+      <h3>Active Algorithm</h3>
+      <div id="algoBadge" class="algo-badge">—</div>
     </div>
 
-    <div class="section-label">Change Algorithm</div>
-    <select class="algo-select" id="algoSelect">
-      <option value="Round Robin">Round Robin</option>
-      <option value="Weighted Round Robin">Weighted Round Robin</option>
-      <option value="Least Connections">Least Connections</option>
-      <option value="Least Response Time">Least Response Time</option>
-      <option value="Dynamic">Dynamic</option>
-    </select>
-    <button class="btn-apply" onclick="changeAlgorithm()">▶ Apply to All LBs</button>
-    <div class="apply-msg" id="applyMsg">✓ Algorithm updated!</div>
-
-    <div class="section-label">Load Balancers</div>
-    <div id="lbStatus">
-      <div class="lb-row" style="color:var(--muted);">Checking…</div>
+    <!-- Algorithm Switcher -->
+    <div class="sidebar-section">
+      <h3>Switch Algorithm</h3>
+      <select class="algo-select" id="algoSelect">
+        <option>Round Robin</option>
+        <option>Weighted Round Robin</option>
+        <option>Least Connections</option>
+        <option>Least Response Time</option>
+        <option>Dynamic</option>
+      </select>
+      <button class="btn-apply" onclick="applyAlgorithm()">✅ Apply to All LBs</button>
     </div>
-  </div>
 
-  <!-- Chart area -->
-  <div class="chart-area">
-    <div class="refresh-info" id="lastUpdated">Auto-refreshes every 2s</div>
+    <!-- Server Pool -->
+    <div class="sidebar-section">
+      <h3>Server Pool</h3>
+      <div class="pool-list" id="poolList">
+        <div style="color:var(--muted);font-size:12px;">Loading…</div>
+      </div>
+    </div>
+
+    <!-- Failure Simulation -->
+    <div class="sidebar-section">
+      <h3>💥 Simulate Failure</h3>
+      <select class="fail-select" id="sidebarServerPort">
+        <option value="8001">Server-8001</option>
+        <option value="8002">Server-8002</option>
+        <option value="8003">Server-8003</option>
+        <option value="8004">Server-8004</option>
+        <option value="8005">Server-8005</option>
+        <option value="8006">Server-8006 (standby)</option>
+        <option value="8007">Server-8007 (standby)</option>
+      </select>
+      <select class="fail-select" id="sidebarDuration">
+        <option value="30">30 seconds</option>
+        <option value="60">60 seconds</option>
+        <option value="120">2 minutes</option>
+      </select>
+      <div class="fail-btn-row">
+        <button class="btn-fail-sm" onclick="sidebarSimulateFailure()">💥 Fail</button>
+        <button class="btn-rec-sm"  onclick="sidebarRecover()">🔄 Recover</button>
+      </div>
+    </div>
+
+  </div><!-- /sidebar -->
+
+  <!-- Main content -->
+  <div class="main-content">
+
+    <!-- Stats strip -->
+    <div class="stats-strip">
+      <div class="stat-card">
+        <div class="stat-label">Active Servers</div>
+        <div class="stat-value" id="statActive">—</div>
+        <div class="stat-sub">in primary pool</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Standby Servers</div>
+        <div class="stat-value" id="statStandby">—</div>
+        <div class="stat-sub">ready to scale up</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Total Requests</div>
+        <div class="stat-value" id="statRequests">—</div>
+        <div class="stat-sub">handled by LB-1</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Avg Response</div>
+        <div class="stat-value" id="statAvgRT">—</div>
+        <div class="stat-sub">ms (last poll)</div>
+      </div>
+    </div>
+
+    <!-- Charts row -->
+    <div class="charts-row">
+      <div class="chart-card">
+        <h3>CPU Usage % per Server</h3>
+        <div class="chart-wrap">
+          <canvas id="cpuChart"></canvas>
+        </div>
+      </div>
+      <div class="chart-card">
+        <h3>Response Time (ms) per Server</h3>
+        <div class="chart-wrap">
+          <canvas id="rtChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Active connections chart -->
     <div class="chart-card">
-      <div class="chart-title">🖥 CPU Usage per Server (%)</div>
-      <canvas id="cpuChart"></canvas>
+      <h3>Active Connections per Server</h3>
+      <div class="chart-wrap">
+        <canvas id="connChart"></canvas>
+      </div>
     </div>
-  </div>
-</div>
+
+    <!-- Events log -->
+    <div class="events-card">
+      <div class="events-header">
+        <h3>📋 System Events Log</h3>
+        <span class="refresh-hint">Refreshes every 5s</span>
+      </div>
+      <div id="eventsList" class="events-list">
+        <div class="events-empty">Waiting for events…</div>
+      </div>
+    </div>
+
+  </div><!-- /main-content -->
+</div><!-- /dashboard -->
+
+<footer>
+  Result Flow — Live Dashboard &nbsp;|&nbsp; Developed by <strong style="color:#3b82f6;">Anushka Yadav</strong> &nbsp;|&nbsp; B.Tech Cloud Computing Project
+</footer>
 
 <script>
-const LB_MAIN = 'http://localhost:4002';
-const LB_ALL  = ['http://localhost:4001', 'http://localhost:4002'];
-let cpuChart  = null;
+  const LB_MAIN   = 'http://localhost:4001';
+  const LB_BACKUP = 'http://localhost:4002';
+  const SERVER_PORTS = [8001,8002,8003,8004,8005,8006,8007];
 
-// ── Status panel ──────────────────────────────────────────────────────────────
-async function fetchStatus() {
-  try {
-    const r    = await fetch(`${LB_MAIN}/status`);
-    const data = await r.json();
+  const CHART_COLORS = [
+    '#3b82f6','#06b6d4','#10b981','#f59e0b','#a855f7','#ef4444','#ec4899'
+  ];
 
-    document.getElementById('currentAlgo').textContent = data.algorithm;
-    document.getElementById('primaryCount').textContent = data.primaryServers.length;
-    document.getElementById('standbyCount').textContent = data.scalingServers.length;
+  let cpuChart, rtChart, connChart;
+  let currentPrimary = [], currentStandby = [];
+  const serverDirectHealth = {}; // port -> true/false
 
-    let html = '';
-    (data.primaryServers || []).forEach(s => {
-      const p = s.split(':')[2];
-      html += `<div class="server-item primary">
-        <div class="dot green"></div>
-        <span class="s-port">:${p}</span>
-        <span class="s-label">Primary</span>
-      </div>`;
-    });
-    (data.scalingServers || []).forEach(s => {
-      const p = s.split(':')[2];
-      html += `<div class="server-item standby">
-        <div class="dot yellow"></div>
-        <span class="s-port">:${p}</span>
-        <span class="s-label">Standby</span>
-      </div>`;
-    });
-    document.getElementById('serverList').innerHTML = html || '<div style="font-size:13px;color:var(--muted);">No data</div>';
-  } catch {
-    document.getElementById('serverList').innerHTML =
-      '<div style="font-size:13px;color:var(--danger);">LB unreachable</div>';
-  }
-}
-
-// ── CPU chart ─────────────────────────────────────────────────────────────────
-async function fetchMetrics() {
-  try {
-    const r       = await fetch(`${LB_MAIN}/metrics`);
-    const metrics = await r.json();
-
-    const servers = Object.keys(metrics.cpuUsages);
-    const labels  = servers.map(s => 'Srv:' + s.split(':')[2]);
-    const values  = servers.map(s => metrics.cpuUsages[s] || 0);
-    const colors  = values.map(v =>
-      v > 75 ? 'rgba(220,38,38,0.85)' :
-      v > 50 ? 'rgba(217,119,6,0.85)' :
-               'rgba(5,150,105,0.85)'
-    );
-
-    if (cpuChart) {
-      cpuChart.data.labels = labels;
-      cpuChart.data.datasets[0].data = values;
-      cpuChart.data.datasets[0].backgroundColor = colors;
-      cpuChart.data.datasets[0].borderColor = colors;
-      cpuChart.update('none');
-    } else {
-      const ctx = document.getElementById('cpuChart').getContext('2d');
-      cpuChart = new Chart(ctx, {
-        type: 'bar',
-        data: {
-          labels,
-          datasets: [{
-            label: 'CPU Usage (%)',
-            data: values,
-            backgroundColor: colors,
-            borderColor: colors,
-            borderWidth: 2,
-            borderRadius: 6,
-          }]
+  // ── Chart helpers ──────────────────────────────────────────────────────────
+  function makeChart(canvasId, label, color) {
+    const ctx = document.getElementById(canvasId).getContext('2d');
+    return new Chart(ctx, {
+      type: 'bar',
+      data: { labels: [], datasets: [{ label, data: [], backgroundColor: [], borderRadius: 6 }] },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          y: { beginAtZero: true, ticks: { color: '#94a3b8' }, grid: { color: '#334155' } },
+          x: { ticks: { color: '#94a3b8' }, grid: { color: '#334155' } },
         },
-        options: {
-          responsive: true,
-          animation: { duration: 400 },
-          scales: {
-            y: {
-              beginAtZero: true, max: 100,
-              ticks: { color: '#94a3b8', font: { size: 13 } },
-              grid:  { color: '#1e293b' }
-            },
-            x: {
-              ticks: { color: '#94a3b8', font: { size: 13 } },
-              grid:  { color: '#334155' }
-            }
-          },
-          plugins: { legend: { labels: { color: '#e2e8f0', font: { size: 14 } } } }
-        }
-      });
-    }
-    document.getElementById('lastUpdated').textContent =
-      'Last updated: ' + new Date().toLocaleTimeString();
-  } catch { /* chart not updated if LB is down */ }
-}
+      },
+    });
+  }
 
-// ── LB health ─────────────────────────────────────────────────────────────────
-async function checkLBHealth() {
-  let html = '';
-  for (const url of LB_ALL) {
-    const port = url.split(':')[2];
+  function updateChart(chart, labels, values) {
+    chart.data.labels   = labels;
+    chart.data.datasets[0].data            = values;
+    chart.data.datasets[0].backgroundColor = labels.map((_, i) => CHART_COLORS[i % CHART_COLORS.length]);
+    chart.update();
+  }
+
+  // ── Fetch metrics from LB-1 ────────────────────────────────────────────────
+  async function fetchMetrics() {
     try {
-      await fetch(`${url}/health`);
-      html += `<div class="lb-row" style="color:var(--success);">● LB-${port} Online</div>`;
+      const r    = await fetch(`${LB_MAIN}/metrics`);
+      const data = await r.json();
+
+      const servers = Object.keys(data.cpuUsages || {});
+      const labels  = servers.map((s) => s.replace('http://localhost:', 'Server-'));
+
+      // CPU Chart
+      updateChart(cpuChart,  labels, servers.map((s) => data.cpuUsages[s]  || 0));
+      // Response Time Chart
+      updateChart(rtChart,   labels, servers.map((s) => data.responseTimes ? (data.responseTimes[s] || 0) : 0));
+      // Connections Chart
+      updateChart(connChart, labels, servers.map((s) => data.requestCounts[s] || 0));
+
+      // Update pool state
+      currentPrimary = data.primaryServers || [];
+      currentStandby = data.scalingServers || [];
+
+      // Stats
+      document.getElementById('statActive').textContent  = data.totalActive  ?? currentPrimary.length;
+      document.getElementById('statStandby').textContent = data.totalStandby ?? currentStandby.length;
+      document.getElementById('statRequests').textContent = data.totalRequestsHandled ?? '—';
+
+      const rts = data.responseTimes ? Object.values(data.responseTimes).filter(Boolean) : [];
+      const avg = rts.length ? Math.round(rts.reduce((a, b) => a + b, 0) / rts.length) : '—';
+      document.getElementById('statAvgRT').textContent = avg;
+
+      // Algorithm badge
+      document.getElementById('algoBadge').textContent = data.algorithm || '—';
+
+      // Server pool list
+      renderPoolList();
+
+    } catch (err) {
+      console.error('[Dashboard] metrics fetch failed:', err.message);
+    }
+  }
+
+  // ── Pool list render ───────────────────────────────────────────────────────
+  function renderPoolList() {
+    const list = document.getElementById('poolList');
+    let html = '';
+    for (const url of currentPrimary) {
+      const port = url.replace('http://localhost:', '');
+      const isDown = serverDirectHealth[port] === false;
+      const cls = isDown ? 'down' : 'primary';
+      const tag = isDown ? 'd' : 'p';
+      const tagLabel = isDown ? 'DOWN' : 'Primary';
+      html += `<div class="server-row">
+        <div class="dot ${cls}"></div>
+        <div class="server-name">Server-${port}</div>
+        <div class="pool-tag ${tag}">${tagLabel}</div>
+      </div>`;
+    }
+    for (const url of currentStandby) {
+      const port = url.replace('http://localhost:', '');
+      const isDown = serverDirectHealth[port] === false;
+      const cls = isDown ? 'down' : 'standby';
+      const tag = isDown ? 'd' : 's';
+      const tagLabel = isDown ? 'DOWN' : 'Standby';
+      html += `<div class="server-row">
+        <div class="dot ${cls}"></div>
+        <div class="server-name">Server-${port}</div>
+        <div class="pool-tag ${tag}">${tagLabel}</div>
+      </div>`;
+    }
+    list.innerHTML = html || '<div style="color:var(--muted);font-size:12px;">No servers found</div>';
+  }
+
+  // ── LB health check ────────────────────────────────────────────────────────
+  async function checkLBHealth() {
+    for (const [port, id] of [[4001,'lb1Badge'],[4002,'lb2Badge']]) {
+      const badge = document.getElementById(id);
+      try {
+        const r = await fetch(`http://localhost:${port}/health`, { signal: AbortSignal.timeout(2500) });
+        if (r.ok) {
+          badge.textContent = '● Online';
+          badge.className   = 'lb-badge ok';
+        } else { throw new Error(); }
+      } catch {
+        badge.textContent = '● Offline';
+        badge.className   = 'lb-badge err';
+      }
+    }
+  }
+
+  // ── Individual server health (direct poll) ─────────────────────────────────
+  async function checkIndividualHealth() {
+    await Promise.all(SERVER_PORTS.map(async (p) => {
+      try {
+        const r = await fetch(`http://localhost:${p}/health`, { signal: AbortSignal.timeout(1500) });
+        const d = await r.json();
+        serverDirectHealth[p] = (d.status === 'Healthy');
+      } catch {
+        serverDirectHealth[p] = false;
+      }
+    }));
+    renderPoolList();
+  }
+
+  // ── Events log ─────────────────────────────────────────────────────────────
+  async function fetchEvents() {
+    try {
+      const r    = await fetch(`${LB_MAIN}/events`);
+      const data = await r.json();
+      const events = data.events || [];
+      const list = document.getElementById('eventsList');
+
+      if (events.length === 0) {
+        list.innerHTML = '<div class="events-empty">No events yet. Try searching a result or simulating a failure.</div>';
+        return;
+      }
+
+      list.innerHTML = events.map((ev) => {
+        const time = new Date(ev.timestamp).toLocaleTimeString();
+        return `<div class="event-row">
+          <div class="event-type et-${ev.type}">${ev.type}</div>
+          <div class="event-msg">${ev.message}</div>
+          <div class="event-time">${time}</div>
+        </div>`;
+      }).join('');
     } catch {
-      html += `<div class="lb-row" style="color:var(--danger);">● LB-${port} Offline</div>`;
+      /* LB not ready yet */
     }
   }
-  document.getElementById('lbStatus').innerHTML = html;
-}
 
-// ── Change algorithm ──────────────────────────────────────────────────────────
-async function changeAlgorithm() {
-  const algo = document.getElementById('algoSelect').value;
-  for (const url of LB_ALL) {
-    try {
-      await fetch(`${url}/changeAlgorithm`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+  // ── Algorithm switcher ─────────────────────────────────────────────────────
+  async function applyAlgorithm() {
+    const algo = document.getElementById('algoSelect').value;
+    for (const lbUrl of [LB_MAIN, LB_BACKUP]) {
+      fetch(`${lbUrl}/changeAlgorithm`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ algorithm: algo }),
-      });
-    } catch { /* skip offline LB */ }
+      }).catch(() => {});
+    }
+    document.getElementById('algoBadge').textContent = algo;
+    setTimeout(fetchEvents, 1200);
   }
-  document.getElementById('currentAlgo').textContent = algo;
-  const msg = document.getElementById('applyMsg');
-  msg.style.display = 'block';
-  setTimeout(() => { msg.style.display = 'none'; }, 2500);
-}
 
-// ── Init & intervals ──────────────────────────────────────────────────────────
-fetchStatus();
-fetchMetrics();
-checkLBHealth();
-setInterval(fetchMetrics,  2000);
-setInterval(fetchStatus,   5000);
-setInterval(checkLBHealth, 30000);
+  // ── Failure simulation (sidebar) ───────────────────────────────────────────
+  async function sidebarSimulateFailure() {
+    const port     = document.getElementById('sidebarServerPort').value;
+    const duration = parseInt(document.getElementById('sidebarDuration').value, 10);
+    try {
+      await fetch(`http://localhost:${port}/simulate-failure`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ duration }),
+      });
+      console.log(`[Dashboard] Simulated failure on port ${port} for ${duration}s`);
+    } catch (e) {
+      console.warn('[Dashboard] Server not reachable:', port);
+    }
+    setTimeout(checkIndividualHealth, 1000);
+    setTimeout(fetchEvents, 2500);
+  }
+
+  async function sidebarRecover() {
+    const port = document.getElementById('sidebarServerPort').value;
+    try {
+      await fetch(`http://localhost:${port}/recover`, { method: 'POST' });
+    } catch {}
+    setTimeout(checkIndividualHealth, 500);
+    setTimeout(fetchEvents, 1500);
+  }
+
+  // ── Status page (/status for algo) ─────────────────────────────────────────
+  async function fetchStatus() {
+    try {
+      const r = await fetch(`${LB_MAIN}/status`);
+      const d = await r.json();
+      document.getElementById('algoBadge').textContent = d.algorithm || '—';
+    } catch {}
+  }
+
+  // ── Init ───────────────────────────────────────────────────────────────────
+  cpuChart  = makeChart('cpuChart',  'CPU Usage %', '#3b82f6');
+  rtChart   = makeChart('rtChart',   'Response Time ms', '#10b981');
+  connChart = makeChart('connChart', 'Connections', '#a855f7');
+
+  checkLBHealth();
+  checkIndividualHealth();
+  fetchMetrics();
+  fetchStatus();
+  fetchEvents();
+
+  setInterval(fetchMetrics,          3000);
+  setInterval(checkLBHealth,         5000);
+  setInterval(checkIndividualHealth, 5000);
+  setInterval(fetchEvents,           5000);
 </script>
 </body>
 </html>
